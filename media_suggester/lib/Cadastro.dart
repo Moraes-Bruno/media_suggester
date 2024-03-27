@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'Login.dart';
 import 'CadastroPreferencias.dart';
 
-class HomeCadastro extends StatefulWidget {
-  const HomeCadastro({super.key});
+class Cadastro extends StatefulWidget {
+  const Cadastro({super.key});
 
   @override
-  State<HomeCadastro> createState() => _HomeCadastroState();
+  State<Cadastro> createState() => _CadastroState();
 }
 
-class _HomeCadastroState extends State<HomeCadastro> {
+class _CadastroState extends State<Cadastro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +24,7 @@ class _HomeCadastroState extends State<HomeCadastro> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        HomeLogin()));
+                        Login()));
           },
         ),
       ),

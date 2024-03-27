@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:media_suggester/Detalhes.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -66,53 +68,27 @@ class _HomeState extends State<Home> {
       ),
       body: Container(
         color: Colors.grey.shade900,
-        child: ListView(
-          children: [
-            Center(
-                child: Text("Recomendações",
-                    style: TextStyle(color: Colors.white, fontSize: 30))),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MediaCard(),
-                  MediaCard(),
-                ],
+        child: ListView(children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  "Recomendações",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 45),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MediaCard(),
-                  MediaCard(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MediaCard(),
-                  MediaCard(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MediaCard(),
-                  MediaCard(),
-                ],
-              ),
-            ),
-          ],
-        ),
+              PlaceholderBody(),
+              SizedBox(
+                height: 60,
+              )
+            ],
+          ),
+        ]),
       ),
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -156,58 +132,168 @@ class _HomeState extends State<Home> {
   }
 }
 
-class MediaCard extends StatelessWidget {
-  const MediaCard({super.key});
+class PlaceholderBody extends StatelessWidget {
+  const PlaceholderBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 170,
-      width: 170,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("assets/images/media_placeholder.jpeg"),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black87, BlendMode.darken)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: 100,
-            width: 100,
-            child: Image(
-              image: AssetImage("assets/images/media_placeholder.jpeg"),
-            ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Text(
+            "Tópico 1",
+            style: TextStyle(color: Colors.white, fontSize: 25),
           ),
-          Text(
-            "O Telefone Preto",
-            style: TextStyle(color: Colors.white),
+        ),
+        CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            pageViewKey: PageStorageKey<String>('carousel_slider'),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                child: Image(
-                  image: AssetImage("assets/images/dezesseis.png"),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Text(
-                  "1h",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
+          items: _ObterListaCards(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Text(
+            "Tópico 2",
+            style: TextStyle(color: Colors.white, fontSize: 25),
           ),
-        ],
-      ),
+        ),
+        CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            pageViewKey: PageStorageKey<String>('carousel_slider'),
+          ),
+          items: _ObterListaCards(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Text(
+            "Tópico 3",
+            style: TextStyle(color: Colors.white, fontSize: 25),
+          ),
+        ),
+        CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            pageViewKey: PageStorageKey<String>('carousel_slider'),
+          ),
+          items: _ObterListaCards(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Text(
+            "Tópico 4",
+            style: TextStyle(color: Colors.white, fontSize: 25),
+          ),
+        ),
+        CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            pageViewKey: PageStorageKey<String>('carousel_slider'),
+          ),
+          items: _ObterListaCards(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Text(
+            "Tópico 5",
+            style: TextStyle(color: Colors.white, fontSize: 25),
+          ),
+        ),
+        CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            pageViewKey: PageStorageKey<String>('carousel_slider'),
+          ),
+          items: _ObterListaCards(context),
+        ),
+      ],
     );
   }
+}
+
+_ObterListaCards(BuildContext context) {
+  final List<String> imgList = [
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
+  ];
+
+  final List<Widget> imageSliders = imgList
+      .map((item) => Container(
+            child: Container(
+              margin: EdgeInsets.all(5.0),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  child: Stack(
+                    children: <Widget>[
+                      Image.network(item, fit: BoxFit.cover, width: 1000.0),
+                      Positioned(
+                        bottom: 0.0,
+                        left: 0.0,
+                        right: 0.0,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Detalhes(0)));
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color.fromARGB(200, 0, 0, 0),
+                                  Color.fromARGB(0, 0, 0, 0)
+                                ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                              ),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 5.0, horizontal: 10.0),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: Image(
+                                    image: AssetImage(
+                                        "assets/images/dezesseis.png"),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 15.0),
+                                  child: Text(
+                                    'Placeholder de Título',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
+          ))
+      .toList();
+
+  return imageSliders;
 }

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:media_suggester/Home.dart';
 import 'Cadastro.dart';
 
-class HomeLogin extends StatefulWidget {
-  const HomeLogin({super.key});
+class Login extends StatefulWidget {
+  const Login({super.key});
 
   @override
-  State<HomeLogin> createState() => _HomeLoginState();
+  State<Login> createState() => _LoginState();
 }
 
-class _HomeLoginState extends State<HomeLogin> {
+class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +65,7 @@ class _HomeLoginState extends State<HomeLogin> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => HomeCadastro()));
+                              builder: (context) => Cadastro()));
                     },
                     child: Text("Criar conta"),
                     style: ElevatedButton.styleFrom(
