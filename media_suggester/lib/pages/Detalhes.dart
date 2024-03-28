@@ -16,10 +16,10 @@ class _DetalhesState extends State<Detalhes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white, size: 30),
+        iconTheme: const IconThemeData(color: Colors.white, size: 30),
         backgroundColor: Colors.red,
         centerTitle: true,
-        title: Text(
+        title: const Text(
           "TÍTULO PLACEHOLDER",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -29,12 +29,12 @@ class _DetalhesState extends State<Detalhes> {
             child: Row(
               children: [
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       shape: BoxShape.circle, color: Colors.white),
                   child: IconButton(
                     onPressed: () {},
-                    icon: Icon(Icons.person, color: Colors.red, size: 30),
-                    padding: EdgeInsetsDirectional.all(8.0),
+                    icon: const Icon(Icons.person, color: Colors.red, size: 30),
+                    padding: const EdgeInsetsDirectional.all(8.0),
                   ),
                 )
               ],

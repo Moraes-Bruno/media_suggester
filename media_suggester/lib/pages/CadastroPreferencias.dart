@@ -12,7 +12,7 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
               image: AssetImage("assets/images/background.png"),
               fit: BoxFit.cover,
@@ -21,9 +21,9 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(
+            const Text(
               "Personalize suas sugestões:",
-              style: TextStyle(color: Colors.white, fontSize: 30),
+              style: TextStyle(fontSize: 30),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -37,7 +37,7 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Genero("AÇÃO", Colors.red),
+                  Genero("AÇÃO", Theme.of(context).colorScheme.secondary),
                   Genero("COMÉDIA", Colors.grey)
                 ],
               ),
@@ -48,7 +48,7 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Genero("SCI-FI", Colors.grey),
-                  Genero("ROMANCE", Colors.red)
+                  Genero("ROMANCE", Theme.of(context).colorScheme.secondary)
                 ],
               ),
             ),
@@ -57,7 +57,7 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Genero("FANTASIA", Colors.red),
+                  Genero("FANTASIA", Theme.of(context).colorScheme.secondary),
                   Genero("BIOGRAFIA", Colors.grey)
                 ],
               ),
@@ -68,7 +68,7 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Genero("TERROR", Colors.grey),
-                  Genero("SUSPENSE", Colors.red)
+                  Genero("SUSPENSE", Theme.of(context).colorScheme.secondary)
                 ],
               ),
             ),
@@ -77,7 +77,12 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
                 width: 200,
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: Row(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -87,11 +92,6 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
                       Icon(Icons.arrow_forward)
                     ],
                   ),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
                 ))
           ],
         ),
@@ -115,15 +115,15 @@ class Genero extends StatelessWidget {
         width: 160,
         child: ElevatedButton(
           onPressed: () {},
-          child: Text(
-            titulo,
-            style: TextStyle(fontSize: 18),
-          ),
           style: ElevatedButton.styleFrom(
               backgroundColor: cor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15))),
+          child: Text(
+            titulo,
+            style: const TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );

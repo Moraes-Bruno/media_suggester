@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:media_suggester/Detalhes.dart';
+import 'package:media_suggester/pages/Detalhes.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,10 +15,10 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white, size: 30),
-        backgroundColor: Colors.red,
+        iconTheme: const IconThemeData(color: Colors.white, size: 30),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
-        title: Text(
+        title: const Text(
           "HOME",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -28,12 +28,12 @@ class _HomeState extends State<Home> {
             child: Row(
               children: [
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       shape: BoxShape.circle, color: Colors.white),
                   child: IconButton(
                     onPressed: () {},
-                    icon: Icon(Icons.person, color: Colors.red, size: 30),
-                    padding: EdgeInsetsDirectional.all(8.0),
+                    icon:  Icon(Icons.person, color: Theme.of(context).colorScheme.secondary, size: 30),
+                    padding: const EdgeInsetsDirectional.all(8.0),
                   ),
                 )
               ],
@@ -67,17 +67,16 @@ class _HomeState extends State<Home> {
         ),
       ),
       body: Container(
-        color: Colors.grey.shade900,
-        child: ListView(children: [
+        color: Theme.of(context).colorScheme.background,
+        child: ListView(children: const [
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(12.0),
                 child: Text(
                   "Recomendações",
                   style: TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 45),
                 ),
@@ -94,16 +93,16 @@ class _HomeState extends State<Home> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton.large(
         onPressed: () {},
-        child: const Icon(Icons.search),
-        backgroundColor: Colors.red.shade600,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.search),
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         height: 70,
-        color: Colors.red,
+        color: Theme.of(context).colorScheme.secondary,
         notchMargin: 5,
         child: Row(
           mainAxisSize: MainAxisSize.max,
@@ -139,8 +138,8 @@ class PlaceholderBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(6.0),
+        const Padding(
+          padding: EdgeInsets.all(6.0),
           child: Text(
             "Tópico 1",
             style: TextStyle(color: Colors.white, fontSize: 25),
@@ -154,8 +153,8 @@ class PlaceholderBody extends StatelessWidget {
           ),
           items: _ObterListaCards(context),
         ),
-        Padding(
-          padding: const EdgeInsets.all(6.0),
+        const Padding(
+          padding: EdgeInsets.all(6.0),
           child: Text(
             "Tópico 2",
             style: TextStyle(color: Colors.white, fontSize: 25),
@@ -169,8 +168,8 @@ class PlaceholderBody extends StatelessWidget {
           ),
           items: _ObterListaCards(context),
         ),
-        Padding(
-          padding: const EdgeInsets.all(6.0),
+        const Padding(
+          padding: EdgeInsets.all(6.0),
           child: Text(
             "Tópico 3",
             style: TextStyle(color: Colors.white, fontSize: 25),
@@ -180,12 +179,12 @@ class PlaceholderBody extends StatelessWidget {
           options: CarouselOptions(
             aspectRatio: 2.0,
             enlargeCenterPage: true,
-            pageViewKey: PageStorageKey<String>('carousel_slider'),
+            pageViewKey: const PageStorageKey<String>('carousel_slider'),
           ),
           items: _ObterListaCards(context),
         ),
-        Padding(
-          padding: const EdgeInsets.all(6.0),
+        const Padding(
+          padding: EdgeInsets.all(6.0),
           child: Text(
             "Tópico 4",
             style: TextStyle(color: Colors.white, fontSize: 25),
@@ -199,8 +198,8 @@ class PlaceholderBody extends StatelessWidget {
           ),
           items: _ObterListaCards(context),
         ),
-        Padding(
-          padding: const EdgeInsets.all(6.0),
+        const Padding(
+          padding: EdgeInsets.all(6.0),
           child: Text(
             "Tópico 5",
             style: TextStyle(color: Colors.white, fontSize: 25),
@@ -210,7 +209,7 @@ class PlaceholderBody extends StatelessWidget {
           options: CarouselOptions(
             aspectRatio: 2.0,
             enlargeCenterPage: true,
-            pageViewKey: PageStorageKey<String>('carousel_slider'),
+            pageViewKey: const PageStorageKey<String>('carousel_slider'),
           ),
           items: _ObterListaCards(context),
         ),
@@ -250,7 +249,7 @@ _ObterListaCards(BuildContext context) {
                                     builder: (context) => Detalhes(0)));
                           },
                           child: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
                                   Color.fromARGB(200, 0, 0, 0),
@@ -260,9 +259,9 @@ _ObterListaCards(BuildContext context) {
                                 end: Alignment.topCenter,
                               ),
                             ),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 5.0, horizontal: 10.0),
-                            child: Row(
+                            child: const Row(
                               children: [
                                 SizedBox(
                                   height: 40,
@@ -273,7 +272,7 @@ _ObterListaCards(BuildContext context) {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 15.0),
+                                  padding: EdgeInsets.only(left: 15.0),
                                   child: Text(
                                     'Placeholder de Título',
                                     style: TextStyle(

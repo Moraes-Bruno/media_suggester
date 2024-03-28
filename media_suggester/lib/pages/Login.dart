@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:media_suggester/Home.dart';
+import 'package:media_suggester/pages/Home.dart';
 import 'Cadastro.dart';
 
 class Login extends StatefulWidget {
@@ -33,7 +33,7 @@ class _LoginState extends State<Login> {
                 width: 200),
             const Text(
               "Login",
-              style: TextStyle(fontSize: 50, color: Colors.white),
+              style: TextStyle(fontSize: 50,),
             ),
             const SizedBox(height: 20),
             Column(
@@ -44,7 +44,7 @@ class _LoginState extends State<Login> {
                     padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
                     child: Text(
                       "Usuário",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                      style: TextStyle(fontSize: 20),
                     )),
                 //input usuario
                 Padding(
@@ -62,19 +62,24 @@ class _LoginState extends State<Login> {
                 const Padding(
                     padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
                     child: Text(
-                      "Usuário",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                      "Senha",
+                      //nao é necessario colocar uma cor para a fonte pois o tema ja faz isso,
+                      //ao menos se for uma cor personalizada
+                      style: TextStyle(fontSize: 20),
                     )),
                 //input senha
                 Padding(
                   padding: const EdgeInsets.only(left: 30, right: 30),
                   child: TextField(
                     decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      filled: true,
+                      /*Theme.of(context).colorScheme:utilizado para acessar as cores do tema,
+                      a unica parte que se altera é o final*/
+                       fillColor: Theme.of(context).colorScheme.inversePrimary,
+                    ),
                   ),
                 ),
               ],
@@ -94,7 +99,7 @@ class _LoginState extends State<Login> {
                               builder: (context) => const Cadastro()));
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: Theme.of(context).colorScheme.tertiary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
@@ -116,14 +121,15 @@ class _LoginState extends State<Login> {
                               builder: (context) => const Home()));
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 253, 17, 0),
-                        foregroundColor: Colors.white,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
                     child: const Text(
                       "Entrar",
                       style:
-                          TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

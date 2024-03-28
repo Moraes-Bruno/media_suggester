@@ -28,7 +28,7 @@ class _CadastroState extends State<Cadastro> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration:  const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage("assets/images/home_background.png"),
                 fit: BoxFit.cover,
@@ -38,17 +38,20 @@ class _CadastroState extends State<Cadastro> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("assets/images/logo_teste.png"),
-                        fit: BoxFit.cover),
-                  ),
-                  height: 280,
-                  width: 200),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Container(
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage("assets/images/logo_teste.png"),
+                          fit: BoxFit.cover),
+                    ),
+                    height: 280,
+                    width: 200),
+              ),
               const Text(
                 "Cadastro",
-                style: TextStyle(fontSize: 50, color: Colors.white),
+                style: TextStyle(fontSize: 50),
               ),
               const SizedBox(height: 20),
               //widget column utilizado para colocar um texto sobre cada campo
@@ -60,7 +63,7 @@ class _CadastroState extends State<Cadastro> {
                       padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
                       child: Text(
                         "Usuário",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        style: TextStyle(fontSize: 20),
                       )),
                   //input usuario
                   Padding(
@@ -73,7 +76,7 @@ class _CadastroState extends State<Cadastro> {
                       ),
                       hintText: "john doe",
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.inversePrimary,
                     )),
                   ),
                   //label email
@@ -81,7 +84,7 @@ class _CadastroState extends State<Cadastro> {
                       padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
                       child: Text(
                         "Email",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        style: TextStyle(fontSize: 20),
                       )),
                   //input email
                   Padding(
@@ -101,7 +104,7 @@ class _CadastroState extends State<Cadastro> {
                       padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
                       child: Text(
                         "Senha",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        style: TextStyle(fontSize: 20),
                       )),
                   //input senha
                    Padding(
@@ -150,8 +153,8 @@ class _CadastroState extends State<Cadastro> {
                                 const CadastroPreferencias()));
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 17, 0),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Theme.of(context).colorScheme.inversePrimary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
                   child: const Text("Cadastar",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
