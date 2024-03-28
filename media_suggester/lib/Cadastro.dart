@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'Login.dart';
 import 'CadastroPreferencias.dart';
 
@@ -21,91 +22,147 @@ class _CadastroState extends State<Cadastro> {
           icon: new Icon(Icons.arrow_back, color: Colors.grey),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        Login()));
+                context, MaterialPageRoute(builder: (context) => Login()));
           },
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/images/home_background.png"),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("assets/images/logo_teste.png"),
-                      fit: BoxFit.cover),
+      body: SingleChildScrollView(
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/home_background.png"),
+                fit: BoxFit.cover,
+                colorFilter:
+                    ColorFilter.mode(Colors.black54, BlendMode.darken)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/images/logo_teste.png"),
+                        fit: BoxFit.cover),
+                  ),
+                  height: 280,
+                  width: 200),
+              const Text(
+                "Cadastro",
+                style: TextStyle(fontSize: 50, color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              //widget column utilizado para colocar um texto sobre cada campo
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //label usuario
+                  const Padding(
+                      padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
+                      child: Text(
+                        "Usuário",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      )),
+                  //input usuario
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 30, right: 30, bottom: 15),
+                    child: TextField(
+                        decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      hintText: "john doe",
+                      filled: true,
+                      fillColor: Colors.white,
+                    )),
+                  ),
+                  //label email
+                  const Padding(
+                      padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
+                      child: Text(
+                        "Email",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      )),
+                  //input email
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30, right: 30, bottom: 15),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                          hintText: "johndoe@gmail.com",
+                          filled: true,
+                          fillColor: Colors.white),
+                    ),
+                  ),
+                  //label senha
+                  const Padding(
+                      padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
+                      child: Text(
+                        "Senha",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      )),
+                  //input senha
+                   Padding(
+                    padding: const EdgeInsets.only(left: 30, right: 30, bottom: 15),
+                    child: TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                            hintText: "**********",
+                            filled: true,
+                            fillColor: Colors.white)),
+                  ),
+                  //label repetir senha
+                  const Padding(
+                      padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
+                      child: Text(
+                        "Repita a senha",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      )),
+                  //input repitir senha
+                   Padding(
+                    padding: const EdgeInsets.only(left: 30, right: 30),
+                    child: TextField(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                          hintText: "**********",
+                          filled: true,
+                          fillColor: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 50,
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const CadastroPreferencias()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 17, 0),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                  child: const Text("Cadastar",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
                 ),
-                height: 280,
-                width: 200),
-            Text(
-              "Cadastro",
-              style: TextStyle(fontSize: 50, color: Colors.white),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 30, right: 30, bottom: 15),
-              child: TextField(
-                  decoration: InputDecoration(
-                      label: Text("Usuário"),
-                      filled: true,
-                      fillColor: Colors.white)),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 30, right: 30, bottom: 15),
-              child: TextField(
-                decoration: InputDecoration(
-                    label: Text("Email"),
-                    filled: true,
-                    fillColor: Colors.white),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 30, right: 30, bottom: 15),
-              child: TextField(
-                  decoration: InputDecoration(
-                      label: Text("Senha"),
-                      filled: true,
-                      fillColor: Colors.white)),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 30, right: 30),
-              child: TextField(
-                decoration: InputDecoration(
-                    label: Text("Confirmar Senha"),
-                    filled: true,
-                    fillColor: Colors.white),
-              ),
-            ),
-            SizedBox(height: 20),
-            SizedBox(
-              height: 50,
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              CadastroPreferencias()));
-                },
-                child: Text("Enviar"),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-              ),
-            ),
-          ],
+              //sizedbox para nao deixar o botao colado na base da tela
+              const SizedBox(
+                height: 20,
+              )
+            ],
+          ),
         ),
       ),
     );
