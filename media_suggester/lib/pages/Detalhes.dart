@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final Uri _url = Uri.parse('https://www.youtube.com');
 
 class Detalhes extends StatefulWidget {
   Detalhes(this.id, {super.key});
@@ -52,7 +55,7 @@ class _DetalhesState extends State<Detalhes> {
                   image: AssetImage("assets/images/placeholder.jpg"),
                 ),
                 SizedBox(
-                  height: 280,
+                  height: 260,
                   child: Padding(
                     padding:
                         const EdgeInsets.only(right: 10, left: 10, bottom: 10),
@@ -132,25 +135,74 @@ class _DetalhesState extends State<Detalhes> {
                 height: 300,
                 color: const Color.fromARGB(255, 42, 42, 42),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Container(
-                        color: Theme.of(context).colorScheme.secondary,
+                    GestureDetector(
+                      onTap: _launchUrl,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.all(20),
                         child: RichText(
-                          text: const TextSpan(
+                          text: TextSpan(
                             children: [
-                              TextSpan(text: 'Ver Trailer',style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
-                              WidgetSpan(
-                                  child: Icon(Icons.play_arrow),
+                              TextSpan(
+                                text: "Trailer   ",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
+                                ),
+                              ),
+                              const WidgetSpan(
+                                child: Icon(
+                                  Icons.play_arrow_rounded,
+                                  size: 30,
+                                ),
                               ),
                             ],
                           ),
-                        ))
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      "Aonde Assistir:",
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(color: Colors.transparent),
+                            ),
+                            child: Image.asset("assets/images/netflix_logo.png",
+                                width: 60, height: 60),
+                          ),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               )
             ],
           ),
         ));
+  }
+
+  Future<void> _launchUrl() async {
+    if (!await launchUrl(_url)) {
+      throw Exception('Could not launch $_url');
+    }
   }
 }

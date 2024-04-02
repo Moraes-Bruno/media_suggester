@@ -7,6 +7,7 @@ ThemeData darkMode = ThemeData(
     secondary: Color.fromRGBO(187, 11, 11,1),
     tertiary: Colors.black,
     inversePrimary: Colors.white,
+    
   ),
   textTheme: const TextTheme(
     bodyLarge: TextStyle(color: Colors.black), // Cor padrão do texto do corpo
