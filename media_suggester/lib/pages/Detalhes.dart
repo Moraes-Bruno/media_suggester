@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:media_suggester/pages/escrever_review.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final Uri _url = Uri.parse('https://www.youtube.com');
@@ -79,7 +80,12 @@ class _DetalhesState extends State<Detalhes> {
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const EscreverReview()));
+                            },
                             style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15),
@@ -100,7 +106,7 @@ class _DetalhesState extends State<Detalhes> {
                 height: 10,
               ),
                Padding(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
                     const Text(
