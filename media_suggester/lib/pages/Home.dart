@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:media_suggester/pages/Detalhes.dart';
+import 'package:media_suggester/pages/reviews.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -32,7 +33,9 @@ class _HomeState extends State<Home> {
                       shape: BoxShape.circle, color: Colors.white),
                   child: IconButton(
                     onPressed: () {},
-                    icon:  Icon(Icons.person, color: Theme.of(context).colorScheme.secondary, size: 30),
+                    icon: Icon(Icons.person,
+                        color: Theme.of(context).colorScheme.secondary,
+                        size: 30),
                     padding: const EdgeInsetsDirectional.all(8.0),
                   ),
                 )
@@ -76,9 +79,7 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.all(12.0),
                 child: Text(
                   "Recomendações",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 45),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 45),
                 ),
               ),
               PlaceholderBody(),
@@ -122,7 +123,14 @@ class _HomeState extends State<Home> {
                 color: Colors.white,
                 size: 45,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Reviews(),
+                  ),
+                );
+              },
             ),
           ],
         ),
