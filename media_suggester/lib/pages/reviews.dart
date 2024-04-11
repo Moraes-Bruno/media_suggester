@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:media_suggester/pages/review_unica.dart';
 
 class Reviews extends StatelessWidget {
   const Reviews({super.key});
@@ -74,65 +75,70 @@ class Reviews extends StatelessWidget {
     ];
 
     final List<Widget> commentSlider = comments.map((comment) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(
-            width: MediaQuery.of(context).size.width-30,
-            margin: const EdgeInsets.only(top: 30),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 42, 42, 42),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Row(
-                    children: [
-                      Image(
-                        image:
-                            AssetImage("assets/images/profile_placeholder.png"),
-                        height: 45,
-                        width: 45,
-                      ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Jane Doe",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          Text(
-                            "★★★★☆",
-                            style: TextStyle(fontSize: 20),
-                          )
-                        ],
-                      ),
-                      Spacer(), // Adiciona um espaçamento flexível
-                      Text(
-                        "01/04/2024", // Sua data aqui
-                        style: TextStyle(fontSize: 16),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 8),
-                  child: Text(
-                    comment,
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                    ),
-                    maxLines: 2,
-                  ),
-                ),
-              ],
-            ),
-          );
+      return GestureDetector(
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ReviewUnica()));
         },
+        child: Builder(
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width-30,
+              margin: const EdgeInsets.only(top: 30),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 42, 42, 42),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        Image(
+                          image:
+                              AssetImage("assets/images/profile_placeholder.png"),
+                          height: 45,
+                          width: 45,
+                        ),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Jane Doe",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              "★★★★☆",
+                              style: TextStyle(fontSize: 20),
+                            )
+                          ],
+                        ),
+                        Spacer(), // Adiciona um espaçamento flexível
+                        Text(
+                          "01/04/2024", // Sua data aqui
+                          style: TextStyle(fontSize: 16),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8),
+                    child: Text(
+                      comment,
+                      style: const TextStyle(
+                        fontSize: 20.0,
+                      ),
+                      maxLines: 2,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       );
     }).toList();
 
