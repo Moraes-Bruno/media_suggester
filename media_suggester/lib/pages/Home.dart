@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:media_suggester/pages/Detalhes.dart';
+import 'package:media_suggester/pages/perfil.dart';
+import 'package:media_suggester/pages/pesquisa.dart';
 import 'package:media_suggester/pages/reviews.dart';
 
 class Home extends StatefulWidget {
@@ -32,7 +34,14 @@ class _HomeState extends State<Home> {
                   decoration: const BoxDecoration(
                       shape: BoxShape.circle, color: Colors.white),
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Perfil(),
+                        ),
+                      );
+                    },
                     icon: Icon(Icons.person,
                         color: Theme.of(context).colorScheme.secondary,
                         size: 30),
@@ -93,7 +102,14 @@ class _HomeState extends State<Home> {
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton.large(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Pesquisa(),
+            ),
+          );
+        },
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
