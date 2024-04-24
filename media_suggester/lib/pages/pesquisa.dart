@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:media_suggester/pages/review_unica.dart';
+import 'package:media_suggester/repository/media_repository.dart';
 
 class Pesquisa extends StatefulWidget {
   const Pesquisa({super.key});
@@ -12,45 +13,28 @@ class Pesquisa extends StatefulWidget {
 }
 
 class _PesquisaState extends State<Pesquisa> {
-  List<dynamic> movies = [];
+  List<dynamic> media = [];
+  MediaRepository mediaRepository = MediaRepository();
 
   @override
   void initState() {
     super.initState();
-    fetchMovies();
   }
 
-  Future<void> fetchMovies() async {
-    TextEditingController _searchController = TextEditingController();
-
-    final response = await http.get(
-      Uri.parse(
-          'https://api.themoviedb.org/3/movie/popular?api_key=MY_API_KEY&language=pt-BR'),
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+  Future<void> procurarMedia(String query) async {
+    try {
+      final result = await mediaRepository.pesquisarMedia(query);
       setState(() {
-        movies = data['results'];
+        media = result
+            .where((movie) =>
+                movie['title'] != null &&
+                movie['overview'] != null &&
+                movie['poster_path'] != null)
+            .toList();
       });
-    } else {
-      throw Exception('Nenhum filme encontrado');
-    }
-  }
-
-  Future<void> searchMovies(String query) async {
-    final response = await http.get(
-      Uri.parse(
-          'https://api.themoviedb.org/3/search/movie?query=' + query + '&api_key=MY_API_KEY&language=pt-BR'),
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      setState(() {
-        movies = data['results'];
-      });
-    } else {
-      throw Exception('Nenhum filme encontrado');
+    } catch (error) {
+      // Lidar com erros
+      print('Erro ao pesquisar filmes: $error');
     }
   }
 
@@ -61,12 +45,9 @@ class _PesquisaState extends State<Pesquisa> {
         iconTheme: const IconThemeData(color: Colors.white, size: 30),
         backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
-        title:  TextField(
-          decoration: InputDecoration(
-            hintText: 'PESQUISAR...',
-            border: InputBorder.none,
-          ),
-          onChanged: searchMovies(),
+        title: const Text(
+          "PESQUISAR",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           Padding(
@@ -98,6 +79,7 @@ class _PesquisaState extends State<Pesquisa> {
                   padding: const EdgeInsets.all(15.0),
                   child: TextField(
                     style: const TextStyle(fontSize: 20),
+                    onSubmitted: procurarMedia,
                     decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
@@ -115,12 +97,21 @@ class _PesquisaState extends State<Pesquisa> {
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: movies.length,
+              itemCount: media.length,
               itemBuilder: (context, index) {
-                final movie = movies[index];
+                final movie = media[index];
                 return ListTile(
-                  title: Text(movie['title']),
-                  subtitle: Text(movie['overview']),
+                  title: Text(
+                    movie['title'],
+                    maxLines: 2,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    movie['overview'],
+                    maxLines: 3,
+                    style: const TextStyle(fontSize: 15),
+                  ),
                   leading: Image.network(
                     'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
                   ),
