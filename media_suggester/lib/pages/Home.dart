@@ -230,7 +230,7 @@ class _HomeState extends State<Home> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Detalhes(0) // Aqui você precisa passar o ID do filme
+                  builder: (context) => Detalhes(movie) // Aqui você precisa passar o ID do filme
                 ),
               );
             },

@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 final Uri _url = Uri.parse('https://www.youtube.com');
 
 class Detalhes extends StatefulWidget {
-  Detalhes(this.id, {super.key});
+  final Map<String, dynamic> media;
 
-  int id;
+  const Detalhes(this.media, {super.key});
 
   //buscar na api os detalhes da mídia
 
@@ -20,14 +21,27 @@ class Detalhes extends StatefulWidget {
 class _DetalhesState extends State<Detalhes> {
   @override
   Widget build(BuildContext context) {
+    print('----------------------');
+    print(widget.media['id']);
+    print(widget.media);
+    print('----------------------');
+
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+
+    DateTime dateTime = DateTime.parse(
+        widget.media['release_date'] ?? widget.media['first_air_date']);
+
+    String dataFormatada = dateFormat.format(dateTime);
+
     return Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white, size: 30),
           backgroundColor: Theme.of(context).colorScheme.primary,
           centerTitle: true,
-          title: const Text(
-            "TÍTULO PLACEHOLDER",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          title: Text(
+            widget.media['title'] ?? widget.media['original_name'],
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
           actions: [
             Padding(
@@ -53,8 +67,14 @@ class _DetalhesState extends State<Detalhes> {
           child: Column(
             children: [
               Stack(children: [
-                const Image(
-                  image: AssetImage("assets/images/placeholder.jpg"),
+                Container(
+                  width: 400,
+                  height: 260,
+                  child: Image(
+                    image: NetworkImage(
+                        'https://image.tmdb.org/t/p/w400/${widget.media['poster_path']}'),
+                    fit: BoxFit.fitWidth,
+                  ),
                 ),
                 SizedBox(
                   height: 260,
@@ -82,9 +102,10 @@ class _DetalhesState extends State<Detalhes> {
                           ElevatedButton(
                             onPressed: () {
                               Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const EscreverReview()));
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const EscreverReview()));
                             },
                             style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
@@ -105,33 +126,42 @@ class _DetalhesState extends State<Detalhes> {
               const SizedBox(
                 height: 10,
               ),
-               Padding(
+              Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    const Text(
-                      "Titulo",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    Text(
+                      widget.media['title'] ?? widget.media['original_name'],
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const Text(
-                      "Duração|Lançamento|ESRB",
+                    Text(
+                      dataFormatada,
                       style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      "gen1|gen2|gen3|gen4",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var genero in widget.media['genre_ids'])
+                          Text(
+                            genero.toString(),
+                            style: const TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          )
+                      ],
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 15),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        
                         children: [
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
@@ -153,18 +183,20 @@ class _DetalhesState extends State<Detalhes> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(
+                            height: 4,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '*****',
-                                style: TextStyle(fontSize: 25),
+                                widget.media['vote_average'].toStringAsFixed(2),
+                                style: const TextStyle(fontSize: 18),
                               ),
-                              SizedBox(width: 50),
-                              Text(
-                                '*****',
-                                style: TextStyle(fontSize: 25),
+                              const SizedBox(width: 50),
+                              const Text(
+                                'A definir',
+                                style: TextStyle(fontSize: 18),
                               ),
                             ],
                           ),
@@ -174,10 +206,11 @@ class _DetalhesState extends State<Detalhes> {
                     const SizedBox(
                       height: 15,
                     ),
-                    const Text(
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut ",
-                      style: TextStyle(fontSize: 20),
-                    )
+                    Text(
+                      widget.media['overview'],
+                      style: const TextStyle(fontSize: 20),
+                      maxLines: 11,
+                    ),
                   ],
                 ),
               ),
@@ -249,13 +282,18 @@ class _DetalhesState extends State<Detalhes> {
                   ],
                 ),
               ),
-              const SizedBox(height: 15,),
+              const SizedBox(
+                height: 15,
+              ),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text("Ver Mais",style: TextStyle(fontSize: 20),),
+                    child: Text(
+                      "Ver Mais",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ],
               ),

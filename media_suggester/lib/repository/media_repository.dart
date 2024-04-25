@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MediaRepository {
-  String chaveApi = "68df955e186472a00f82954f57d23073";
+
+  String chaveApi = "chave_api";
   final String urlBase = 'https://api.themoviedb.org/3';
 
   Future<List<dynamic>> getMediaGenero(int generoId, String tipoMedia) async {
     final String url =
-        '$urlBase/discover/$tipoMedia?api_key=$chaveApi&language=pt-BR&with_genres=$generoId';
+        '$urlBase/discover/$tipoMedia?api_key=$chaveApi&language=pt-BR&with_genres=$generoId&append_to_response=genres';
 
     final resposta = await http.get(Uri.parse(url));
 
@@ -32,6 +33,8 @@ class MediaRepository {
       throw Exception('Falha ao buscar Conteudo');
     }
   }
+
+  
 
   
 }
