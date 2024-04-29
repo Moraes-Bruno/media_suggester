@@ -34,7 +34,24 @@ class MediaRepository {
     }
   }
 
-  
+  Future<Map<int, String>> fetchGeneros({String? firstAirDate}) async {
+    final bool tv = firstAirDate != null;
 
-  
+    final response = await http.get(
+      //se a media for series adiciona "tv" a url se não for adiciona "media" a mesma
+      Uri.parse('$urlBase/genre/${tv ? 'tv' : 'movie'}/list?api_key=$chaveApi&language=pt-BR'),
+    );
+
+    if (response.statusCode == 200) {
+      final decodedResponse = json.decode(response.body);
+      final Map<int, String> genreMap = {};
+      for (var genre in decodedResponse['genres']) {
+        genreMap[genre['id']] = genre['name'];
+      }
+      return genreMap;
+    } else {
+      throw Exception('Failed to load genres');
+    }
+  }
+
 }

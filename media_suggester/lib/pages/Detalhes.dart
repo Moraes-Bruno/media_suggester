@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
+import 'package:media_suggester/repository/media_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 
@@ -12,19 +13,32 @@ class Detalhes extends StatefulWidget {
 
   const Detalhes(this.media, {super.key});
 
-  //buscar na api os detalhes da mídia
-
   @override
   State<Detalhes> createState() => _DetalhesState();
 }
 
 class _DetalhesState extends State<Detalhes> {
+  final MediaRepository _mediaRepository = MediaRepository();
+
+  Map<int, String> _generos = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchGeneros();
+  }
+
+  Future<void> _fetchGeneros() async {
+    final firstAirDate = widget.media['first_air_date'];
+    final genres =
+        await _mediaRepository.fetchGeneros(firstAirDate: firstAirDate);
+    setState(() {
+      _generos = genres;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    print('----------------------');
-    print(widget.media['id']);
-    print(widget.media);
-    print('----------------------');
 
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -141,18 +155,22 @@ class _DetalhesState extends State<Detalhes> {
                     ),
                     Text(
                       dataFormatada,
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8, // Espaçamento entre os gêneros
+                      runSpacing: 8, // Espaçamento entre as linhas
                       children: [
-                        for (var genero in widget.media['genre_ids'])
+                        for (var genreId in widget.media['genre_ids'])
                           Text(
-                            genero.toString(),
+                            '${_generos[genreId] ?? ''}',
                             style: const TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.bold),
-                          )
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                       ],
                     ),
                     Container(
@@ -190,7 +208,9 @@ class _DetalhesState extends State<Detalhes> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                widget.media['vote_average'].toStringAsFixed(2),
+                                widget.media['vote_average']
+                                        .toStringAsFixed(1) +
+                                    '/10',
                                 style: const TextStyle(fontSize: 18),
                               ),
                               const SizedBox(width: 50),
