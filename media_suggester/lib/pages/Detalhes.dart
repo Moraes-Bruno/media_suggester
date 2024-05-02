@@ -6,8 +6,6 @@ import 'package:media_suggester/repository/media_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 
-final Uri _url = Uri.parse('https://www.youtube.com');
-
 class Detalhes extends StatefulWidget {
   final Map<String, dynamic> media;
 
@@ -39,6 +37,7 @@ class _DetalhesState extends State<Detalhes> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.media['id']);
 
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -239,53 +238,24 @@ class _DetalhesState extends State<Detalhes> {
               ),
               Container(
                 width: double.infinity,
-                height: 300,
+                height: 180,
                 color: const Color.fromARGB(255, 42, 42, 42),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: _launchUrl,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Trailer   ",
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary,
-                                ),
-                              ),
-                              const WidgetSpan(
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  size: 30,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                     const Text(
                       "Aonde Assistir:",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
+                    const SizedBox(height: 20,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            _procurarGoogle(widget.media['title']);
+                          },
                           child: Container(
                             width: 60,
                             height: 60,
@@ -293,7 +263,7 @@ class _DetalhesState extends State<Detalhes> {
                               color: Colors.transparent,
                               border: Border.all(color: Colors.transparent),
                             ),
-                            child: Image.asset("assets/images/netflix_logo.png",
+                            child: Image.asset("assets/images/play-button.png",
                                 width: 60, height: 60),
                           ),
                         )
@@ -333,7 +303,12 @@ class _DetalhesState extends State<Detalhes> {
         ));
   }
 
-  Future<void> _launchUrl() async {
+  Future<void> _procurarGoogle(String nomeFilme) async {
+    //String mediaUri = Uri.encodeQueryComponent(nomeFilme);
+    final Uri _url = Uri.parse('https://www.google.com/search?q=$nomeFilme');
+
+    print(_url);
+
     if (!await launchUrl(_url)) {
       throw Exception('Could not launch $_url');
     }
