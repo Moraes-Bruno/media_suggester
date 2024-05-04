@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "975640941576",
+    "project_id": "projetopi5",
+    "storage_bucket": "projetopi5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975640941576:android:35eab8244e029c54966dbd",
+        "android_client_info": {
+          "package_name": "br.gov.sp.cps.fatecitapira.media_suggester"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975640941576-bt9n6ndkt03m6ms8nrmrvd7apurt2krc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw1eRbEc31n-zw-GwdJfZ9yZ6xs7ynpUs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975640941576-bt9n6ndkt03m6ms8nrmrvd7apurt2krc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "975640941576-anc4j0lp2vl5nqb6hvoipfq5ct825mjt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "br.gov.sp.cps.fatecitapira.mediaSuggester"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

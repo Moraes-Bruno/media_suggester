@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:media_suggester/pages/Home.dart';
-import 'Cadastro.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -10,6 +12,41 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // O usuário cancelou o login.
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        print('Usuário logado: ${user.displayName}');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Home(),
+            ),
+          );
+      }
+    } catch (e) {
+      print('Erro ao fazer login com Google: $e');
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,55 +73,6 @@ class _LoginState extends State<Login> {
               style: TextStyle(fontSize: 50,),
             ),
             const SizedBox(height: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                //label usuario
-                const Padding(
-                    padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
-                    child: Text(
-                      "Usuário",
-                      style: TextStyle(fontSize: 20),
-                    )),
-                //input usuario
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 30, right: 30, bottom: 15),
-                  child: TextField(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white)),
-                ),
-                //label senha
-                const Padding(
-                    padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
-                    child: Text(
-                      "Senha",
-                      //nao é necessario colocar uma cor para a fonte pois o tema ja faz isso,
-                      //ao menos se for uma cor personalizada
-                      style: TextStyle(fontSize: 20),
-                    )),
-                //input senha
-                Padding(
-                  padding: const EdgeInsets.only(left: 30, right: 30),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      filled: true,
-                      /*Theme.of(context).colorScheme:utilizado para acessar as cores do tema,
-                      a unica parte que se altera é o final*/
-                       fillColor: Theme.of(context).colorScheme.inversePrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -92,34 +80,7 @@ class _LoginState extends State<Login> {
                   height: 50,
                   width: 150,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Cadastro()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.tertiary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15))),
-                    child: const Text(
-                      "Criar conta",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 50,
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Home()));
-                    },
+                    onPressed: _signInWithGoogle,
                     style: ElevatedButton.styleFrom(
                         backgroundColor:
                             Theme.of(context).colorScheme.secondary,
@@ -139,5 +100,33 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
+  }
+
+    Future<dynamic> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e) {
+      // TODO
+      print('exception->$e');
+    }
+  }
+
+    Future<bool> signOutFromGoogle() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
   }
 }
