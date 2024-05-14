@@ -2,32 +2,59 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
+import 'package:media_suggester/repository/media_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-final Uri _url = Uri.parse('https://www.youtube.com');
+import 'package:intl/intl.dart';
 
 class Detalhes extends StatefulWidget {
-  Detalhes(this.id, {super.key});
+  final Map<String, dynamic> media;
 
-  int id;
-
-  //buscar na api os detalhes da mídia
+  const Detalhes(this.media, {super.key});
 
   @override
   State<Detalhes> createState() => _DetalhesState();
 }
 
 class _DetalhesState extends State<Detalhes> {
+  final MediaRepository _mediaRepository = MediaRepository();
+
+  Map<int, String> _generos = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchGeneros();
+  }
+
+  Future<void> _fetchGeneros() async {
+    final firstAirDate = widget.media['first_air_date'];
+    final genres =
+        await _mediaRepository.fetchGeneros(firstAirDate: firstAirDate);
+    setState(() {
+      _generos = genres;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(widget.media['id']);
+
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+
+    DateTime dateTime = DateTime.parse(
+        widget.media['release_date'] ?? widget.media['first_air_date']);
+
+    String dataFormatada = dateFormat.format(dateTime);
+
     return Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white, size: 30),
           backgroundColor: Theme.of(context).colorScheme.primary,
           centerTitle: true,
-          title: const Text(
-            "TÍTULO PLACEHOLDER",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          title: Text(
+            widget.media['title'] ?? widget.media['original_name'],
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
           actions: [
             Padding(
@@ -53,8 +80,14 @@ class _DetalhesState extends State<Detalhes> {
           child: Column(
             children: [
               Stack(children: [
-                const Image(
-                  image: AssetImage("assets/images/placeholder.jpg"),
+                Container(
+                  width: 400,
+                  height: 260,
+                  child: Image(
+                    image: NetworkImage(
+                        'https://image.tmdb.org/t/p/w400/${widget.media['poster_path']}'),
+                    fit: BoxFit.fitWidth,
+                  ),
                 ),
                 SizedBox(
                   height: 260,
@@ -82,9 +115,10 @@ class _DetalhesState extends State<Detalhes> {
                           ElevatedButton(
                             onPressed: () {
                               Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const EscreverReview()));
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const EscreverReview()));
                             },
                             style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
@@ -105,33 +139,46 @@ class _DetalhesState extends State<Detalhes> {
               const SizedBox(
                 height: 10,
               ),
-               Padding(
+              Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    const Text(
-                      "Titulo",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    Text(
+                      widget.media['title'] ?? widget.media['original_name'],
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const Text(
-                      "Duração|Lançamento|ESRB",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    Text(
+                      dataFormatada,
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      "gen1|gen2|gen3|gen4",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8, // Espaçamento entre os gêneros
+                      runSpacing: 8, // Espaçamento entre as linhas
+                      children: [
+                        for (var genreId in widget.media['genre_ids'])
+                          Text(
+                            '${_generos[genreId] ?? ''}',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                      ],
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 15),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        
                         children: [
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
@@ -153,18 +200,22 @@ class _DetalhesState extends State<Detalhes> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(
+                            height: 4,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '*****',
-                                style: TextStyle(fontSize: 25),
+                                widget.media['vote_average']
+                                        .toStringAsFixed(1) +
+                                    '/10',
+                                style: const TextStyle(fontSize: 18),
                               ),
-                              SizedBox(width: 50),
-                              Text(
-                                '*****',
-                                style: TextStyle(fontSize: 25),
+                              const SizedBox(width: 50),
+                              const Text(
+                                'A definir',
+                                style: TextStyle(fontSize: 18),
                               ),
                             ],
                           ),
@@ -174,10 +225,11 @@ class _DetalhesState extends State<Detalhes> {
                     const SizedBox(
                       height: 15,
                     ),
-                    const Text(
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut ",
-                      style: TextStyle(fontSize: 20),
-                    )
+                    Text(
+                      widget.media['overview'],
+                      style: const TextStyle(fontSize: 20),
+                      maxLines: 11,
+                    ),
                   ],
                 ),
               ),
@@ -186,53 +238,24 @@ class _DetalhesState extends State<Detalhes> {
               ),
               Container(
                 width: double.infinity,
-                height: 300,
+                height: 180,
                 color: const Color.fromARGB(255, 42, 42, 42),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: _launchUrl,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Trailer   ",
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary,
-                                ),
-                              ),
-                              const WidgetSpan(
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  size: 30,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                     const Text(
                       "Aonde Assistir:",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
+                    const SizedBox(height: 20,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            _procurarGoogle(widget.media['title']);
+                          },
                           child: Container(
                             width: 60,
                             height: 60,
@@ -240,7 +263,7 @@ class _DetalhesState extends State<Detalhes> {
                               color: Colors.transparent,
                               border: Border.all(color: Colors.transparent),
                             ),
-                            child: Image.asset("assets/images/netflix_logo.png",
+                            child: Image.asset("assets/images/play-button.png",
                                 width: 60, height: 60),
                           ),
                         )
@@ -249,13 +272,18 @@ class _DetalhesState extends State<Detalhes> {
                   ],
                 ),
               ),
-              const SizedBox(height: 15,),
+              const SizedBox(
+                height: 15,
+              ),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text("Ver Mais",style: TextStyle(fontSize: 20),),
+                    child: Text(
+                      "Ver Mais",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ],
               ),
@@ -275,7 +303,12 @@ class _DetalhesState extends State<Detalhes> {
         ));
   }
 
-  Future<void> _launchUrl() async {
+  Future<void> _procurarGoogle(String nomeFilme) async {
+    //String mediaUri = Uri.encodeQueryComponent(nomeFilme);
+    final Uri _url = Uri.parse('https://www.google.com/search?q=$nomeFilme');
+
+    print(_url);
+
     if (!await launchUrl(_url)) {
       throw Exception('Could not launch $_url');
     }

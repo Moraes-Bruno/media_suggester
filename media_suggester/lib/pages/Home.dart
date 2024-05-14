@@ -5,6 +5,7 @@ import 'package:media_suggester/pages/Detalhes.dart';
 import 'package:media_suggester/pages/perfil.dart';
 import 'package:media_suggester/pages/pesquisa.dart';
 import 'package:media_suggester/pages/reviews.dart';
+import 'package:media_suggester/repository/media_repository.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,6 +15,55 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final MediaRepository _mediaRepository = MediaRepository();
+
+  List<dynamic> _mediaPorGenero = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarMedia(); // Carregue os dados da API ao inicializar a tela
+  }
+
+  Future<void> _carregarMedia() async {
+    try {
+      final List<int> generos = [
+        28,
+        35,
+        18,
+        16
+      ]; // Ação, Comédia, Drama, Animação
+
+      // Carrega os filmes
+      final List<Future<List<dynamic>>> futuresFilmes = generos.map((genreId) {
+        return _mediaRepository.getMediaGenero(genreId, 'movie');
+      }).toList();
+
+      // Carrega as séries
+      final List<Future<List<dynamic>>> futuresSeries = generos.map((genreId) {
+        return _mediaRepository.getMediaGenero(genreId, 'tv');
+      }).toList();
+
+      final List<List<dynamic>> resultsFilmes =
+          await Future.wait(futuresFilmes);
+      final List<List<dynamic>> resultsSeries =
+          await Future.wait(futuresSeries);
+
+      // Combina as listas de filmes e séries
+      List<List<dynamic>> combinedResults = [];
+      for (int i = 0; i < generos.length; i++) {
+        combinedResults.add([...resultsFilmes[i], ...resultsSeries[i]]);
+      }
+
+      setState(() {
+        _mediaPorGenero = combinedResults;
+      });
+    } catch (e) {
+      print('Erro ao carregar dados da API: $e');
+      // Trate o erro conforme necessário
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,27 +128,44 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
-      body: Container(
-        color: Theme.of(context).colorScheme.background,
-        child: ListView(children: const [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Text(
-                  "Recomendações",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 45),
-                ),
-              ),
-              PlaceholderBody(),
-              SizedBox(
-                height: 60,
-              )
-            ],
-          ),
-        ]),
-      ),
+      body: _mediaPorGenero.isEmpty
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: _mediaPorGenero.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Gênero ${index + 1}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        aspectRatio: 16/9,
+                        viewportFraction:1/3,
+                        enlargeCenterPage: false,
+                        pageViewKey:
+                            PageStorageKey<String>('carousel_slider_$index'),
+                      ),
+                      items: _ObterListaCards(
+                        context,
+                        _mediaPorGenero[index],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              },
+            ),
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton.large(
@@ -155,168 +222,28 @@ class _HomeState extends State<Home> {
   }
 }
 
-class PlaceholderBody extends StatelessWidget {
-  const PlaceholderBody({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(6.0),
-          child: Text(
-            "Tópico 1",
-            style: TextStyle(color: Colors.white, fontSize: 25),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 2.0,
-            enlargeCenterPage: true,
-            pageViewKey: PageStorageKey<String>('carousel_slider'),
-          ),
-          items: _ObterListaCards(context),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(6.0),
-          child: Text(
-            "Tópico 2",
-            style: TextStyle(color: Colors.white, fontSize: 25),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 2.0,
-            enlargeCenterPage: true,
-            pageViewKey: PageStorageKey<String>('carousel_slider'),
-          ),
-          items: _ObterListaCards(context),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(6.0),
-          child: Text(
-            "Tópico 3",
-            style: TextStyle(color: Colors.white, fontSize: 25),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 2.0,
-            enlargeCenterPage: true,
-            pageViewKey: const PageStorageKey<String>('carousel_slider'),
-          ),
-          items: _ObterListaCards(context),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(6.0),
-          child: Text(
-            "Tópico 4",
-            style: TextStyle(color: Colors.white, fontSize: 25),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 2.0,
-            enlargeCenterPage: true,
-            pageViewKey: PageStorageKey<String>('carousel_slider'),
-          ),
-          items: _ObterListaCards(context),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(6.0),
-          child: Text(
-            "Tópico 5",
-            style: TextStyle(color: Colors.white, fontSize: 25),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 2.0,
-            enlargeCenterPage: true,
-            pageViewKey: const PageStorageKey<String>('carousel_slider'),
-          ),
-          items: _ObterListaCards(context),
-        ),
-      ],
-    );
-  }
-}
-
-_ObterListaCards(BuildContext context) {
-  final List<String> imgList = [
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-    'https://vgaa.ca/wp-content/uploads/2022/08/minimalist-movie.jpg',
-  ];
-
-  final List<Widget> imageSliders = imgList
-      .map((item) => Container(
+ List<Widget> _ObterListaCards(BuildContext context, List<dynamic> movies) {
+    return movies
+        .map(
+          (movie) => GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Detalhes(movie) // Aqui você precisa passar o ID do filme
+                ),
+              );
+            },
             child: Container(
-              margin: EdgeInsets.all(5.0),
+              margin: const EdgeInsets.all(5.0),
               child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  child: Stack(
-                    children: <Widget>[
-                      Image.network(item, fit: BoxFit.cover, width: 1000.0),
-                      Positioned(
-                        bottom: 0.0,
-                        left: 0.0,
-                        right: 0.0,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Detalhes(0)));
-                          },
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color.fromARGB(200, 0, 0, 0),
-                                  Color.fromARGB(0, 0, 0, 0)
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                              ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5.0, horizontal: 10.0),
-                            child: const Row(
-                              children: [
-                                SizedBox(
-                                  height: 40,
-                                  width: 40,
-                                  child: Image(
-                                    image: AssetImage(
-                                        "assets/images/dezesseis.png"),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 15.0),
-                                  child: Text(
-                                    'Placeholder de Título',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )),
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
+                ),
+              ),
             ),
-          ))
-      .toList();
-
-  return imageSliders;
-}
+          ),
+        )
+        .toList();
+  }
