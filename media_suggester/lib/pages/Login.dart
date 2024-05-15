@@ -3,6 +3,7 @@ import 'package:media_suggester/pages/Home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,7 +15,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -34,18 +36,31 @@ class _LoginState extends State<Login> {
       final User? user = userCredential.user;
 
       if (user != null) {
+        // Verificar se o documento do usuário existe no Firestore
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+          // Se o documento não existir, criar um novo documento com as informações do usuário
+          await _firestore.collection('users').doc(user.uid).set({
+            'name': user.displayName,
+            'email': user.email,
+            'photoUrl': user.photoURL,
+          });
+        }
+
         print('Usuário logado: ${user.displayName}');
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Home(),
-            ),
-          );
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Home(),
+          ),
+        );
       }
     } catch (e) {
       print('Erro ao fazer login com Google: $e');
     }
   }
+
   
   @override
   Widget build(BuildContext context) {
