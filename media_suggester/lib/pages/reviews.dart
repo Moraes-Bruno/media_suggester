@@ -1,8 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/pages/review_unica.dart';
 
-class Reviews extends StatelessWidget {
+class Reviews extends StatefulWidget {
   const Reviews({super.key});
+
+  @override
+  State<Reviews> createState() => _ReviewsState();
+}
+
+class _ReviewsState extends State<Reviews> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<dynamic> listReviews = [];
+
+  void carregarReviews() async {
+    final reviews = await _firestore.collection('reviews').get();
+    listReviews = reviews.docs.map((doc) => doc.data()).toList();
+    print(listReviews);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    carregarReviews();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +72,9 @@ class Reviews extends StatelessWidget {
                   fillColor: Theme.of(context).colorScheme.inversePrimary,
                   hintText: "Procurar Review",
                   hintStyle: TextStyle(color: Theme.of(context).colorScheme.tertiary)
-              
+
                 ),
-                
+
               ),
             ),
             //tres pontos(...) expande a lista de widgets em uma lista de argumentos
