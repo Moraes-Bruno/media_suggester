@@ -1,4 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
@@ -16,14 +18,20 @@ class Detalhes extends StatefulWidget {
 }
 
 class _DetalhesState extends State<Detalhes> {
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final MediaRepository _mediaRepository = MediaRepository();
 
   Map<int, String> _generos = {};
+  bool _isFavorited = false;
 
   @override
   void initState() {
     super.initState();
     _fetchGeneros();
+    _favoritado();
   }
 
   Future<void> _fetchGeneros() async {
@@ -33,6 +41,63 @@ class _DetalhesState extends State<Detalhes> {
     setState(() {
       _generos = genres;
     });
+  }
+
+  Future<void> _favoritado() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        DocumentReference userDoc = _firestore.collection('users').doc(user.uid);
+        DocumentSnapshot userSnapshot = await userDoc.get();
+        List favoritos = userSnapshot['favoritos'] ?? [];
+        setState(() {
+          _isFavorited = favoritos.contains(widget.media['title'] ?? widget.media['original_name']);
+        });
+      } catch (e) {
+        print(e);
+      }
+    }
+
+  }
+
+  Future<void> _favoritar(String nomeMedia) async{
+     User? user = _auth.currentUser;
+
+     if(user!= null){
+      try{
+        DocumentReference userDoc = _firestore.collection('users').doc(user.uid);
+
+        DocumentSnapshot userSnapshot = await userDoc.get();
+
+        List favoritos = userSnapshot['favoritos'] ?? [];
+
+        if(favoritos.contains(nomeMedia)){
+          await userDoc.update({
+            'favoritos': FieldValue.arrayRemove([nomeMedia])
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${ widget.media['title'] ?? widget.media['original_name']} Removido dos favoritos'))
+        );
+        }else{
+            await userDoc.update({
+          'favoritos': FieldValue.arrayUnion([nomeMedia])
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${ widget.media['title'] ?? widget.media['original_name']} adicionado aos favoritos'))
+        );
+        }
+
+      }catch(e){
+        print(e);
+      }
+     }else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário não autenticado!'))
+      );
+    }
+     
   }
 
   @override
@@ -99,14 +164,16 @@ class _DetalhesState extends State<Detalhes> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _favoritar(widget.media['title'] ?? widget.media['original_name']);
+                            },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     Theme.of(context).colorScheme.secondary,
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
-                              Icons.favorite,
+                               _isFavorited ? Icons.favorite : Icons.favorite_border_outlined,
                               color:
                                   Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
