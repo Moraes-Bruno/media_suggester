@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
+import 'package:media_suggester/pages/favorito.dart';
 import 'package:media_suggester/repository/media_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +26,8 @@ class _DetalhesState extends State<Detalhes> {
   final MediaRepository _mediaRepository = MediaRepository();
 
   Map<int, String> _generos = {};
+
+  User? user;
   bool _isFavorited = false;
 
   @override
@@ -32,6 +35,7 @@ class _DetalhesState extends State<Detalhes> {
     super.initState();
     _fetchGeneros();
     _favoritado();
+    user = _auth.currentUser;
   }
 
   Future<void> _fetchGeneros() async {
@@ -44,10 +48,10 @@ class _DetalhesState extends State<Detalhes> {
   }
 
   Future<void> _favoritado() async {
-    User? user = _auth.currentUser;
+
     if (user != null) {
       try {
-        DocumentReference userDoc = _firestore.collection('users').doc(user.uid);
+        DocumentReference userDoc = _firestore.collection('users').doc(user?.uid);
         DocumentSnapshot userSnapshot = await userDoc.get();
         List favoritos = userSnapshot['favoritos'] ?? [];
         setState(() {
@@ -61,11 +65,10 @@ class _DetalhesState extends State<Detalhes> {
   }
 
   Future<void> _favoritar(String nomeMedia) async{
-     User? user = _auth.currentUser;
 
      if(user!= null){
       try{
-        DocumentReference userDoc = _firestore.collection('users').doc(user.uid);
+        DocumentReference userDoc = _firestore.collection('users').doc(user?.uid);
 
         DocumentSnapshot userSnapshot = await userDoc.get();
 
@@ -102,7 +105,6 @@ class _DetalhesState extends State<Detalhes> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.media['id']);
 
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -139,7 +141,12 @@ class _DetalhesState extends State<Detalhes> {
                 ],
               ),
             ),
-          ],
+          ],leading: IconButton(
+            onPressed: (){
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
         body: SingleChildScrollView(
           child: Column(
