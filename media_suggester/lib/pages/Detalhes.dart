@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -138,8 +136,9 @@ class _DetalhesState extends State<Detalhes> {
                 ],
               ),
             ),
-          ],leading: IconButton(
-            onPressed: (){
+          ],
+          leading: IconButton(
+            onPressed: () {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.arrow_back),
@@ -161,8 +160,8 @@ class _DetalhesState extends State<Detalhes> {
                 SizedBox(
                   height: 260,
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                        right: 10, left: 10, bottom: 10),
+                    padding:
+                        const EdgeInsets.only(right: 10, left: 10, bottom: 10),
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -181,9 +180,8 @@ class _DetalhesState extends State<Detalhes> {
                               _isFavorited
                                   ? Icons.favorite
                                   : Icons.favorite_border_outlined,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .inversePrimary,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
                             ),
                           ),
@@ -202,9 +200,8 @@ class _DetalhesState extends State<Detalhes> {
                                     Theme.of(context).colorScheme.secondary),
                             child: Icon(
                               Icons.note_alt,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .inversePrimary,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
                             ),
                           ),
@@ -260,22 +257,19 @@ class _DetalhesState extends State<Detalhes> {
                               Text(
                                 'Criticos',
                                 style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(width: 16),
                               Text(
                                 '|',
                                 style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(width: 16),
                               Text(
                                 'Usuarios',
                                 style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -324,8 +318,8 @@ class _DetalhesState extends State<Detalhes> {
                   children: [
                     const Text(
                       "Aonde Assistir:",
-                      style: TextStyle(
-                          fontSize: 25, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(
                       height: 20,
@@ -344,10 +338,8 @@ class _DetalhesState extends State<Detalhes> {
                               color: Colors.transparent,
                               border: Border.all(color: Colors.transparent),
                             ),
-                            child: Image.asset(
-                                "assets/images/play-button.png",
-                                width: 60,
-                                height: 60),
+                            child: Image.asset("assets/images/play-button.png",
+                                width: 60, height: 60),
                           ),
                         )
                       ],
@@ -375,8 +367,7 @@ class _DetalhesState extends State<Detalhes> {
                 options: CarouselOptions(
                   aspectRatio: 2.0,
                   enlargeCenterPage: true,
-                  pageViewKey:
-                      const PageStorageKey<String>('carousel_slider'),
+                  pageViewKey: const PageStorageKey<String>('carousel_slider'),
                 ),
               ),
               const SizedBox(

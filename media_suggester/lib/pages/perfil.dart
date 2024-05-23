@@ -1,23 +1,65 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/pages/AlterarPerfil.dart';
+import 'package:media_suggester/pages/Detalhes.dart';
 import 'package:media_suggester/pages/favorito.dart';
-import 'package:media_suggester/pages/review_unica.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:media_suggester/repository/media_repository.dart';
 
 class Perfil extends StatelessWidget {
-  const Perfil({super.key});
+  Perfil({super.key});
+
+  final User? user = FirebaseAuth.instance.currentUser;
+  final MediaRepository mediaRepository = MediaRepository();
 
   Future<Map<String, dynamic>> _getUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>;
       }
     }
     return {};
+  }
+
+  Future<List<dynamic>> _fetchFavoritos(String userId) async {
+    List<String> favoritos = [];
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        var data = userDoc.data() as Map<String, dynamic>;
+        favoritos = List<String>.from(data['favoritos'] ?? []);
+      }
+
+      List<dynamic> mediaTemp = [];
+      for (String favorito in favoritos) {
+        final result = await mediaRepository.pesquisarMedia(favorito);
+        final firstValidMedia = result
+            .where((movie) =>
+                movie['title'] != null &&
+                movie['overview'] != null &&
+                movie['poster_path'] != null)
+            .take(1)
+            .toList();
+
+        if (firstValidMedia.isNotEmpty) {
+          mediaTemp.add(firstValidMedia[0]);
+        }
+      }
+
+      return mediaTemp.take(6).toList();
+    } catch (e) {
+      print("Nao foi possivel retornar os favoritos: $e");
+      return [];
+    }
   }
 
   @override
@@ -54,54 +96,60 @@ class Perfil extends StatelessWidget {
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _getUserData(),
-        builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+        builder: (BuildContext context,
+            AsyncSnapshot<Map<String, dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Erro ao carregar os dados do usuário"));
+            return const Center(
+                child: Text("Erro ao carregar os dados do usuário"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("Nenhum dado do usuário encontrado"));
+            return const Center(
+                child: Text("Nenhum dado do usuário encontrado"));
           } else {
             Map<String, dynamic> userData = snapshot.data!;
             return SingleChildScrollView(
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                margin: EdgeInsets.only(top: 40, bottom: 40),
+                margin: const EdgeInsets.only(top: 40, bottom: 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image(
                       image: userData['photoUrl'] != null
                           ? NetworkImage(userData['photoUrl'])
-                          : AssetImage('assets/images/profile_placeholder.png') as ImageProvider,
+                          : const AssetImage(
+                                  'assets/images/profile_placeholder.png')
+                              as ImageProvider,
                       width: 200,
                       height: 200,
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width,
                       color: const Color.fromARGB(255, 42, 42, 42),
-                      margin: EdgeInsets.only(top: 40),
+                      margin: const EdgeInsets.only(top: 40),
                       child: SizedBox(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Center(
+                              const Center(
                                 child: Text(
                                   'INFORMAÇÕES',
                                   style: TextStyle(
-                                      fontSize: 24, fontWeight: FontWeight.bold),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Text(
-                                'Nome: ${userData['name'] ?? ''}',
-                                style: TextStyle(fontSize: 16),
+                                'Nome: ${userData['name'] ?? 'Nome não disponível'}',
+                                style: const TextStyle(fontSize: 16),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                'Email: ${userData['email'] ?? ''}',
-                                style: TextStyle(fontSize: 16),
+                                'Email: ${userData['email'] ?? 'Email não disponível'}',
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           ),
@@ -109,7 +157,7 @@ class Perfil extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 16, bottom: 16),
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
                       width: 250,
                       height: 40,
                       child: ElevatedButton(
@@ -121,14 +169,16 @@ class Perfil extends StatelessWidget {
                             ),
                           );
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
                         child: Text(
                           'ALTERAR DADOS',
                           style: TextStyle(
                               fontSize: 16,
-                              color: Theme.of(context).colorScheme.inversePrimary),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary),
                         ),
                       ),
                     ),
@@ -137,9 +187,9 @@ class Perfil extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Favoritos',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 20),
                           ),
                           TextButton(
                             onPressed: () {
@@ -153,20 +203,74 @@ class Perfil extends StatelessWidget {
                             child: Text(
                               'Ver mais',
                               style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).colorScheme.inversePrimary),
+                                  fontSize: 20,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    CarouselSlider(
-                      items: __ObterFav(context),
-                      options: CarouselOptions(
-                        aspectRatio: 2.0,
-                        enlargeCenterPage: true,
-                        pageViewKey: const PageStorageKey<String>('carousel_slider'),
-                      ),
+                    FutureBuilder<List<dynamic>>(
+                      future: _fetchFavoritos(user!.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return const Center(
+                              child: Text("Erro ao carregar favoritos"));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text("Nenhum favorito encontrado"));
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 10,right: 10),
+                            child: CarouselSlider(
+                              items: snapshot.data!.map((item) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        // Navigate to details page
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Detalhes(item),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.all(5.0),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            'https://image.tmdb.org/t/p/w500${item['poster_path']}',
+                                            fit: BoxFit.cover,
+                                            width: 1000.0,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }).toList(),
+                              options: CarouselOptions(
+                                aspectRatio: 16 / 9,
+                                viewportFraction: 1 / 3,
+                                enlargeCenterPage: false,
+                                enableInfiniteScroll: true,
+                                initialPage: 1,
+                                autoPlay: false,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -176,26 +280,5 @@ class Perfil extends StatelessWidget {
         },
       ),
     );
-  }
-
-  List<Widget> __ObterFav(BuildContext context) {
-    final List<String> comments = [
-      ".",
-    ];
-
-    final List<Widget> commentSlider = comments.map((comment) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(
-            child: Image(
-                image: AssetImage('assets/images/vertical_placeholder.jpg'),
-                width: 300,
-                height: 200),
-          );
-        },
-      );
-    }).toList();
-
-    return commentSlider;
   }
 }
