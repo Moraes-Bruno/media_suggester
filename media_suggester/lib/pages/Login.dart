@@ -17,6 +17,11 @@ class _LoginState extends State<Login> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<bool> _checkIfLoggedIn() async {
+    User? user = _auth.currentUser;
+    return user != null;
+  }
+
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -50,11 +55,9 @@ class _LoginState extends State<Login> {
         }
 
         print('Usuário logado: ${user.displayName}');
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const Home(),
-          ),
+          MaterialPageRoute(builder: (context) => const Home()),
         );
       }
     } catch (e) {
@@ -62,87 +65,77 @@ class _LoginState extends State<Login> {
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/images/home_background.png"),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("assets/images/logo_teste.png"),
-                      fit: BoxFit.cover),
+    return FutureBuilder<bool>(
+      future: _checkIfLoggedIn(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Mostrar um indicador de carregamento enquanto espera a verificação
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasData && snapshot.data == true) {
+          // Se o usuário está logado, redireciona para a tela Home
+          return const Home();
+        } else {
+          // Se o usuário não está logado, mostrar a tela de login
+          return Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/home_background.png"),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
                 ),
-                height: 280,
-                width: 200),
-            const Text(
-              "Login",
-              style: TextStyle(fontSize: 50,),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(
-                  height: 50,
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: _signInWithGoogle,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15))),
-                    child: const Text(
-                      "Entrar",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("assets/images/logo_teste.png"),
+                        fit: BoxFit.cover,
+                      ),
                     ),
+                    height: 280,
+                    width: 200,
                   ),
-                ),
-              ],
+                  const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 50,),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        height: 50,
+                        width: 150,
+                        child: ElevatedButton(
+                          onPressed: _signInWithGoogle,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                            foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: const Text(
+                            "Entrar",
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
-  }
-
-    Future<dynamic> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } on Exception catch (e) {
-      // TODO
-      print('exception->$e');
-    }
-  }
-
-    Future<bool> signOutFromGoogle() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      return true;
-    } on Exception catch (_) {
-      return false;
-    }
   }
 }
