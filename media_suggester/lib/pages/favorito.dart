@@ -67,7 +67,7 @@ class _FavoritoState extends State<Favorito> {
               movie['poster_path'] != null)
           .toList()
           .take(1)
-          .toList(); // Pega apenas o primeiro resultado
+          .toList(); //Pega apenas o primeiro resultado
 
       if (firstValidMedia.isNotEmpty) {
         setState(() {
@@ -109,7 +109,12 @@ class _FavoritoState extends State<Favorito> {
               ],
             ),
           ),
-        ]
+        ],leading:IconButton(
+          onPressed: () {
+            
+          },
+          icon: const Icon(Icons.arrow_back)
+        )
       ),
        body: isLoading
           ? const Center(child: CircularProgressIndicator())
