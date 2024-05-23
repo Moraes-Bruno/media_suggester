@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +21,6 @@ class Detalhes extends StatefulWidget {
 }
 
 class _DetalhesState extends State<Detalhes> {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -48,64 +49,60 @@ class _DetalhesState extends State<Detalhes> {
   }
 
   Future<void> _favoritado() async {
-
     if (user != null) {
       try {
-        DocumentReference userDoc = _firestore.collection('users').doc(user?.uid);
+        DocumentReference userDoc =
+            _firestore.collection('users').doc(user?.uid);
         DocumentSnapshot userSnapshot = await userDoc.get();
         List favoritos = userSnapshot['favoritos'] ?? [];
         setState(() {
-          _isFavorited = favoritos.contains(widget.media['title'] ?? widget.media['original_name']);
+          _isFavorited = favoritos
+              .contains(widget.media['title'] ?? widget.media['original_name']);
         });
       } catch (e) {
         print(e);
       }
     }
-
   }
 
-  Future<void> _favoritar(String nomeMedia) async{
-
-     if(user!= null){
-      try{
-        DocumentReference userDoc = _firestore.collection('users').doc(user?.uid);
+  Future<void> _favoritar(String nomeMedia) async {
+    if (user != null) {
+      try {
+        DocumentReference userDoc =
+            _firestore.collection('users').doc(user?.uid);
 
         DocumentSnapshot userSnapshot = await userDoc.get();
 
         List favoritos = userSnapshot['favoritos'] ?? [];
 
-        if(favoritos.contains(nomeMedia)){
+        if (favoritos.contains(nomeMedia)) {
           await userDoc.update({
             'favoritos': FieldValue.arrayRemove([nomeMedia])
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${ widget.media['title'] ?? widget.media['original_name']} Removido dos favoritos'))
-        );
-        }else{
-            await userDoc.update({
-          'favoritos': FieldValue.arrayUnion([nomeMedia])
-        });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  '${widget.media['title'] ?? widget.media['original_name']} Removido dos favoritos')));
+        } else {
+          await userDoc.update({
+            'favoritos': FieldValue.arrayUnion([nomeMedia])
+          });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${ widget.media['title'] ?? widget.media['original_name']} adicionado aos favoritos'))
-        );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  '${widget.media['title'] ?? widget.media['original_name']} adicionado aos favoritos')));
         }
-
-      }catch(e){
+      } catch (e) {
         print(e);
       }
-     }else {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário não autenticado!'))
-      );
+          const SnackBar(content: Text('Usuário não autenticado!')));
     }
-     
   }
 
   @override
   Widget build(BuildContext context) {
-
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
     DateTime dateTime = DateTime.parse(
@@ -164,15 +161,16 @@ class _DetalhesState extends State<Detalhes> {
                 SizedBox(
                   height: 260,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(right: 10, left: 10, bottom: 10),
+                    padding: const EdgeInsets.only(
+                        right: 10, left: 10, bottom: 10),
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              _favoritar(widget.media['title'] ?? widget.media['original_name']);
+                              _favoritar(widget.media['title'] ??
+                                  widget.media['original_name']);
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -180,9 +178,12 @@ class _DetalhesState extends State<Detalhes> {
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
-                               _isFavorited ? Icons.favorite : Icons.favorite_border_outlined,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              _isFavorited
+                                  ? Icons.favorite
+                                  : Icons.favorite_border_outlined,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .inversePrimary,
                               size: 25,
                             ),
                           ),
@@ -201,8 +202,9 @@ class _DetalhesState extends State<Detalhes> {
                                     Theme.of(context).colorScheme.secondary),
                             child: Icon(
                               Icons.note_alt,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .inversePrimary,
                               size: 25,
                             ),
                           ),
@@ -258,19 +260,22 @@ class _DetalhesState extends State<Detalhes> {
                               Text(
                                 'Criticos',
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
                               ),
                               SizedBox(width: 16),
                               Text(
                                 '|',
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
                               ),
                               SizedBox(width: 16),
                               Text(
                                 'Usuarios',
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -319,10 +324,12 @@ class _DetalhesState extends State<Detalhes> {
                   children: [
                     const Text(
                       "Aonde Assistir:",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -337,8 +344,10 @@ class _DetalhesState extends State<Detalhes> {
                               color: Colors.transparent,
                               border: Border.all(color: Colors.transparent),
                             ),
-                            child: Image.asset("assets/images/play-button.png",
-                                width: 60, height: 60),
+                            child: Image.asset(
+                                "assets/images/play-button.png",
+                                width: 60,
+                                height: 60),
                           ),
                         )
                       ],
@@ -366,7 +375,8 @@ class _DetalhesState extends State<Detalhes> {
                 options: CarouselOptions(
                   aspectRatio: 2.0,
                   enlargeCenterPage: true,
-                  pageViewKey: const PageStorageKey<String>('carousel_slider'),
+                  pageViewKey:
+                      const PageStorageKey<String>('carousel_slider'),
                 ),
               ),
               const SizedBox(
