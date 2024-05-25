@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class MediaRepository {
 
-  String chaveApi = "";
+  String chaveApi = "chave_api";
   final String urlBase = 'https://api.themoviedb.org/3';
 
   Future<List<dynamic>> getMediaGenero(int generoId, String tipoMedia) async {
