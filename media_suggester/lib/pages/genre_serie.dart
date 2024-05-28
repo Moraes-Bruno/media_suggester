@@ -63,7 +63,7 @@ class _Gender_serieState extends State<Gender_serie> {
     _firestore.collection('preferences').doc(user?.uid).update({
       'genders_serie': selectedGenresData,
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Home()));
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>Home(null)));
   }
 
 

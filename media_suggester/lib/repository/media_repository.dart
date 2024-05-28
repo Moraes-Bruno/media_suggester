@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class MediaRepository {
 
-  String chaveApi = "add a chavinha aqui hahahaha";
+  String chaveApi = "chave_api";
   final String urlBase = 'https://api.themoviedb.org/3';
 
 
