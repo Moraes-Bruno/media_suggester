@@ -23,14 +23,11 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
           children: [
             const Text(
               "Personalize suas sugestões:",
-              style: TextStyle(fontSize: 30),
+              style: TextStyle(fontSize: 32),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Tipo("Filmes"), Tipo("Séries"), Tipo("Outros")],
-              ),
+            Text(
+              "Escolha um ou mais generos",
+              style: TextStyle(fontSize: 24),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -39,36 +36,6 @@ class _CadastroPreferenciasState extends State<CadastroPreferencias> {
                 children: [
                   Genero("AÇÃO", Theme.of(context).colorScheme.secondary),
                   Genero("COMÉDIA", Colors.grey)
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Genero("SCI-FI", Colors.grey),
-                  Genero("ROMANCE", Theme.of(context).colorScheme.secondary)
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Genero("FANTASIA", Theme.of(context).colorScheme.secondary),
-                  Genero("BIOGRAFIA", Colors.grey)
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Genero("TERROR", Colors.grey),
-                  Genero("SUSPENSE", Theme.of(context).colorScheme.secondary)
                 ],
               ),
             ),

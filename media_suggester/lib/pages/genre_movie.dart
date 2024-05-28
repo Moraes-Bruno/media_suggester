@@ -4,15 +4,15 @@ import 'dart:convert';
 import 'package:media_suggester/repository/media_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:media_suggester/pages/gender_serie.dart';
+import 'package:media_suggester/pages/genre_serie.dart';
 
 
-class Gender_movie extends StatefulWidget {
+class Genre_movie extends StatefulWidget {
   @override
-  _Gender_movieState createState() => _Gender_movieState();
+  _Genre_movieState createState() => _Genre_movieState();
 }
 
-class _Gender_movieState extends State<Gender_movie> {
+class _Genre_movieState extends State<Genre_movie> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -63,6 +63,7 @@ class _Gender_movieState extends State<Gender_movie> {
     _firestore.collection('preferences').doc(user?.uid).set({
       'genders_movie': selectedGenresData,
     });
+    Navigator.of(context).pop();
     Navigator.push(context, MaterialPageRoute(builder: (context)=>Gender_serie()));
   }
 
