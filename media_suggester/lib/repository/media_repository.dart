@@ -2,12 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MediaRepository {
-<<<<<<< HEAD
 
   String chaveApi = "68df955e186472a00f82954f57d23073";
-=======
-  String chaveApi = "";
->>>>>>> e95b66a952ef540b44a516e590b756d44ea433d3
   final String urlBase = 'https://api.themoviedb.org/3';
 
 
@@ -73,9 +69,4 @@ class MediaRepository {
       throw Exception('Failed to load genres');
     }
   }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> e95b66a952ef540b44a516e590b756d44ea433d3
 }
