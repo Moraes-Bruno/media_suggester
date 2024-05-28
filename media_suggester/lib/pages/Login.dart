@@ -1,9 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:media_suggester/pages/genre_movie.dart';
 import 'package:media_suggester/pages/Home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart' ;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -25,19 +29,23 @@ class _LoginState extends State<Login> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser
+          .authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential = await _auth.signInWithCredential(
+          credential);
       final User? user = userCredential.user;
 
       if (user != null) {
         // Verificar se o documento do usuário existe no Firestore
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        final userDoc = await _firestore.collection('users')
+            .doc(user.uid)
+            .get();
 
         if (!userDoc.exists) {
           // Se o documento não existir, criar um novo documento com as informações do usuário
@@ -48,20 +56,20 @@ class _LoginState extends State<Login> {
           });
         }
 
-        print('Usuário logado: ${user.displayName}');
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const Home(),
-          ),
-        );
+
+        print('Usuário logado: ${user.uid}');
+
+        // Faz vericação de login
+        verificarPreferencia(user.uid).then((value){
+          value ? Navigator.push(context, MaterialPageRoute(builder: (context)=>Home()))
+              : Navigator.push(context, MaterialPageRoute(builder: (context)=>Genre_movie()));
+        });
       }
     } catch (e) {
       print('Erro ao fazer login com Google: $e');
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,17 +103,26 @@ class _LoginState extends State<Login> {
                   height: 50,
                   width: 150,
                   child: ElevatedButton(
-                    onPressed: _signInWithGoogle,
+                    onPressed: () {
+                      _signInWithGoogle();
+                      //_signInWithGoogle;
+                    },
                     style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+                        Theme
+                            .of(context)
+                            .colorScheme
+                            .secondary,
+                        foregroundColor: Theme
+                            .of(context)
+                            .colorScheme
+                            .inversePrimary,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
                     child: const Text(
                       "Entrar",
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -117,12 +134,12 @@ class _LoginState extends State<Login> {
     );
   }
 
-    Future<dynamic> signInWithGoogle() async {
+  Future<dynamic> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+      await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -136,11 +153,26 @@ class _LoginState extends State<Login> {
     }
   }
 
-    Future<bool> signOutFromGoogle() async {
+  Future<bool> signOutFromGoogle() async {
     try {
       await FirebaseAuth.instance.signOut();
       return true;
     } on Exception catch (_) {
+      return false;
+    }
+  }
+
+  // Verificação se existe o user na preferencia
+  static Future<bool> verificarPreferencia(String userId) async {
+    try {
+      DocumentSnapshot user = await FirebaseFirestore.instance
+          .collection("preferences").doc(userId).get();
+          //.where("token_google", isEqualTo: "12345x")
+      // Se houver documentos encontrados, retorna true
+      print(user.exists);
+      return user.exists;
+    } catch (e) {
+      // Em caso de erro, retorna false
       return false;
     }
   }
