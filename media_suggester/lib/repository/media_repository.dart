@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MediaRepository {
+<<<<<<< HEAD
 
   String chaveApi = "68df955e186472a00f82954f57d23073";
+=======
+  String chaveApi = "";
+>>>>>>> e95b66a952ef540b44a516e590b756d44ea433d3
   final String urlBase = 'https://api.themoviedb.org/3';
 
 
@@ -21,9 +25,23 @@ class MediaRepository {
     }
   }
 
-   Future<List<dynamic>> pesquisarMedia(String pesquisa) async {
+  Future<List<dynamic>> pesquisarMedia(String pesquisa) async {
     final String url =
         '$urlBase/search/multi?api_key=$chaveApi&language=pt-BR&query=$pesquisa';
+
+    final resposta = await http.get(Uri.parse(url));
+
+    if (resposta.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(resposta.body);
+      return data['results'];
+    } else {
+      throw Exception('Falha ao buscar Conteudo');
+    }
+  }
+
+  Future<List<dynamic>> getFilme(String filmeId) async {
+    final String url =
+        '$urlBase/movie/$filmeId?api_key=$chaveApi&language=pt-BR';
 
     final resposta = await http.get(Uri.parse(url));
 
@@ -40,7 +58,8 @@ class MediaRepository {
 
     final response = await http.get(
       //se a media for series adiciona "tv" a url se não for adiciona "media" a mesma
-      Uri.parse('$urlBase/genre/${tv ? 'tv' : 'movie'}/list?api_key=$chaveApi&language=pt-BR'),
+      Uri.parse(
+          '$urlBase/genre/${tv ? 'tv' : 'movie'}/list?api_key=$chaveApi&language=pt-BR'),
     );
 
     if (response.statusCode == 200) {
@@ -54,6 +73,9 @@ class MediaRepository {
       throw Exception('Failed to load genres');
     }
   }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e95b66a952ef540b44a516e590b756d44ea433d3
 }
