@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/pages/genre_movie.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  const Login({Key? key}) : super(key: key);
 
   @override
   State<Login> createState() => _LoginState();
@@ -17,12 +17,36 @@ class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLoggedIn().then((loggedIn) {
+      if (loggedIn) {
+        // Se o usuário já está logado, redirecionar para a página Home
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Home()));
+      }
+    });
+  }
+
+  Future<bool> _checkIfLoggedIn() async {
+    User? user = _auth.currentUser;
+    return user != null;
+  }
 
   Future<void> _signInWithGoogle() async {
     try {
+      setState(() {
+        _isLoading = true; // Ativar indicador de progresso
+      });
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // O usuário cancelou o login.
+        setState(() {
+          _isLoading = false; // Desativar indicador de progresso
+        });
         return;
       }
 
@@ -50,12 +74,6 @@ class _LoginState extends State<Login> {
         }
 
         print('Usuário logado: ${user.displayName}');
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const Home(),
-          ),
-        );
         verificarPreferencia(user.uid).then((value){
           value ? Navigator.push(context, MaterialPageRoute(builder: (context)=>Home()))
               : Navigator.push(context, MaterialPageRoute(builder: (context)=>Genre_movie()));
@@ -63,93 +81,87 @@ class _LoginState extends State<Login> {
       }
     } catch (e) {
       print('Erro ao fazer login com Google: $e');
+    } finally {
+      setState(() {
+        _isLoading = false; // Desativar indicador de progresso
+      });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/images/home_background.png"),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("assets/images/logo_teste.png"),
-                      fit: BoxFit.cover),
-                ),
-                height: 280,
-                width: 200),
-            const Text(
-              "Login",
-              style: TextStyle(fontSize: 50,),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/home_background.png"),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
+              ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 50,
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: _signInWithGoogle,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15))),
-                    child: const Text(
-                      "Entrar",
-                      style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/logo_teste.png"),
+                      fit: BoxFit.cover,
                     ),
                   ),
+                  height: 280,
+                  width: 200,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 40,fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SizedBox(
+                      height: 50,
+                      width: 150,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _signInWithGoogle,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                            : const Text(
+                          "Entrar",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Future<dynamic> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-      final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } on Exception catch (e) {
-      // TODO
-      print('exception->$e');
-    }
-  }
-
-  Future<bool> signOutFromGoogle() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      return true;
-    } on Exception catch (_) {
-      return false;
-    }
-  }
-  // Verificação se existe o user na preferencia
   static Future<bool> verificarPreferencia(String userId) async {
     try {
       DocumentSnapshot user = await FirebaseFirestore.instance
@@ -164,4 +176,3 @@ class _LoginState extends State<Login> {
     }
   }
 }
-
