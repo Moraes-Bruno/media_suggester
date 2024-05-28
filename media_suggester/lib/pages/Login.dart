@@ -18,6 +18,7 @@ class _LoginState extends State<Login> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
+  User? userLogado;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _LoginState extends State<Login> {
     _checkIfLoggedIn().then((loggedIn) {
       if (loggedIn) {
         // Se o usuário já está logado, redirecionar para a página Home
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Home()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(_auth.currentUser)));
       }
     });
   }
@@ -77,7 +78,7 @@ class _LoginState extends State<Login> {
 
         print('Usuário logado: ${user.displayName}');
         verificarPreferencia(user.uid).then((value){
-          value ? Navigator.push(context, MaterialPageRoute(builder: (context)=>Home()))
+          value ? Navigator.push(context, MaterialPageRoute(builder: (context)=>Home(user)))
               : Navigator.push(context, MaterialPageRoute(builder: (context)=>Genre_movie()));
         });
       }

@@ -1,17 +1,23 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:media_suggester/models/Suggestion.dart';
 import 'package:media_suggester/pages/Detalhes.dart';
 import 'package:media_suggester/pages/perfil.dart';
 import 'package:media_suggester/pages/pesquisa.dart';
 import 'package:media_suggester/pages/reviews.dart';
 import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/repository/suggestion_repository.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  Home(this.user, {super.key});
+
+  User? user;
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Home> createState() => _HomeState(user);
 }
 
 class _HomeState extends State<Home> {
@@ -19,10 +25,61 @@ class _HomeState extends State<Home> {
 
   List<dynamic> _mediaPorGenero = [];
 
+  _HomeState(this.user);
+
+  User? user;
+
   @override
   void initState() {
     super.initState();
+    carregarSugestoes(user);
     _carregarMedia(); // Carregue os dados da API ao inicializar a tela
+  }
+
+  Future<void> carregarSugestoes(User? user) async {
+    verificarExisteRecomendacoes(user!.uid).then((value) async {
+      if (!value) {
+        //aqui eu trago do banco as preferencias
+        DocumentSnapshot preferences = await FirebaseFirestore.instance
+            .collection("preferences")
+            .doc(user.uid)
+            .get();
+
+        print(preferences.get('genders_serie'));
+        print(preferences.get('genders_movie'));
+
+        List<Map<String, dynamic>> filmes = List<Map<String, dynamic>>.from(
+            preferences.get('genders_movie') ?? []);
+        List<Map<String, dynamic>> series = List<Map<String, dynamic>>.from(
+            preferences.get('genders_serie') ?? []);
+
+        SuggestionRepository suggestionRepository = new SuggestionRepository();
+
+        List<dynamic>? sugestoes_series =
+            await suggestionRepository.GerarSugestoes(
+                "series", series.map((serie) => serie['name']).join(', '));
+        print(sugestoes_series);
+
+        List<dynamic>? sugestoes_filmes =
+            await suggestionRepository.GerarSugestoes(
+                "filmes", filmes.map((filme) => filme['name']).join(', '));
+        print(sugestoes_filmes);
+
+        //agora é preciso verificar se as mídias recomendadas existem na api do themoviedb
+
+        //depois de conferir todas, tenho que guardar no banco, sustituindo o nome dos gêneros pelo id e o mesmo com as mídias
+
+        //depois de tudo finalizado, devo retornar as sugestões para usar na função que carrega os dados da mídia.
+
+      } else {
+        DocumentSnapshot suggestionSnapshot = await FirebaseFirestore.instance
+            .collection("suggestions")
+            .doc(user!.uid)
+            .get();
+
+        return Suggestion.fromDocumentSnapshot(suggestionSnapshot);
+      }
+    });
   }
 
   Future<void> _carregarMedia() async {
@@ -150,8 +207,8 @@ class _HomeState extends State<Home> {
                     ),
                     CarouselSlider(
                       options: CarouselOptions(
-                        aspectRatio: 16/9,
-                        viewportFraction:1/3,
+                        aspectRatio: 16 / 9,
+                        viewportFraction: 1 / 3,
                         enlargeCenterPage: false,
                         pageViewKey:
                             PageStorageKey<String>('carousel_slider_$index'),
@@ -222,28 +279,41 @@ class _HomeState extends State<Home> {
   }
 }
 
- List<Widget> _ObterListaCards(BuildContext context, List<dynamic> movies) {
-    return movies
-        .map(
-          (movie) => GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Detalhes(movie) // Aqui você precisa passar o ID do filme
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.all(5.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
-                ),
+List<Widget> _ObterListaCards(BuildContext context, List<dynamic> movies) {
+  return movies
+      .map(
+        (movie) => GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Detalhes(movie) // Aqui você precisa passar o ID do filme
+                  ),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.all(5.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.network(
+                'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
               ),
             ),
           ),
-        )
-        .toList();
+        ),
+      )
+      .toList();
+}
+
+Future<bool> verificarExisteRecomendacoes(String userId) async {
+  try {
+    DocumentSnapshot suggestions = await FirebaseFirestore.instance
+        .collection("suggestions")
+        .doc(userId)
+        .get();
+    return suggestions.exists;
+  } catch (e) {
+    return false;
   }
+}
