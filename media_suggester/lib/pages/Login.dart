@@ -70,7 +70,9 @@ class _LoginState extends State<Login> {
           await _firestore.collection('users').doc(user.uid).set({
             'name': user.displayName,
             'email': user.email,
+            'favoritos': [],
             'photoUrl': user.photoURL,
+
           });
         }
 
