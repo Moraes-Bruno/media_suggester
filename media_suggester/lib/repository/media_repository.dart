@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MediaRepository {
-
   String chaveApi = "chave_api";
   final String urlBase = 'https://api.themoviedb.org/3';
-
 
   Future<List<dynamic>> getMediaGenero(int generoId, String tipoMedia) async {
     final String url =
@@ -35,7 +33,7 @@ class MediaRepository {
     }
   }
 
-  Future<List<dynamic>> getFilme(String filmeId) async {
+  Future<Map<String, dynamic>> getFilme(String filmeId) async {
     final String url =
         '$urlBase/movie/$filmeId?api_key=$chaveApi&language=pt-BR';
 
@@ -43,7 +41,7 @@ class MediaRepository {
 
     if (resposta.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(resposta.body);
-      return data['results'];
+      return data;
     } else {
       throw Exception('Falha ao buscar Conteudo');
     }

@@ -25,18 +25,28 @@ class _ReviewsState extends State<Reviews> {
             .collection('reviews')
             .limit(10)
             .where('descricao', isEqualTo: busca)
+            .orderBy('criacao', descending: true)
             .get();
       });
     } else {
       setState(() {
-        listReviews = _firestore.collection('reviews').limit(10).get();
+        listReviews = _firestore
+            .collection('reviews')
+            .limit(10)
+            .orderBy('criacao', descending: true)
+            .get();
       });
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     carregarReviews("");
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white, size: 30),
@@ -94,7 +104,6 @@ class _ReviewsState extends State<Reviews> {
               child: FutureBuilder(
                 future: listReviews,
                 builder: (context, snapshot) {
-                  print(snapshot.data!.docs);
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
                     case ConnectionState.waiting:
@@ -123,16 +132,16 @@ class _ReviewsState extends State<Reviews> {
     );
   }
 
-  /*_carregarFilme(String filmeId) async {
-    await _mediaRepository.getFilme(filmeId);
-  }*/
+  _carregarFilme(String filmeId) async {
+    Map<String, dynamic> filme = await _mediaRepository.getFilme(filmeId);
+    return filme;
+  }
 
   _obterComentarios(BuildContext context, AsyncSnapshot snapshot) {
     List<dynamic> listReviewsTemp =
         snapshot.data.docs; //.map((doc) => doc.data()).toList();
     List<Widget> widgets = [];
     for (final review in listReviewsTemp) {
-      //_carregarFilme(review["filmeId"]);
       String nota = "";
       for (var i = 0; i < review['nota']; i++) {
         nota += "★";
@@ -142,7 +151,7 @@ class _ReviewsState extends State<Reviews> {
       widgets.add(GestureDetector(
         onTap: () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const ReviewUnica()));
+              MaterialPageRoute(builder: (context) => ReviewUnica(review)));
         },
         child: Builder(
           builder: (BuildContext context) {
@@ -159,12 +168,29 @@ class _ReviewsState extends State<Reviews> {
                     padding: EdgeInsets.all(10.0),
                     child: Row(
                       children: [
-                        Image(
-                          image: AssetImage(
-                              "assets/images/profile_placeholder.png"),
-                          height: 45,
-                          width: 45,
-                        ),
+                        FutureBuilder(
+                            future: review['user'].get(),
+                            builder: (context, snapshot) {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.none:
+                                case ConnectionState.waiting:
+                                  return Image(
+                                    image: AssetImage(
+                                        "assets/images/profile_placeholder.png"),
+                                    height: 45,
+                                    width: 45,
+                                  );
+                                default:
+                                  return Image(
+                                    image: NetworkImage(
+                                        (snapshot.data as DocumentSnapshot)
+                                            .get("photoUrl")),
+                                    height: 45,
+                                    width: 45,
+                                  );
+                              }
+                            }),
+
                         SizedBox(
                           width: 15,
                         ),
@@ -186,33 +212,66 @@ class _ReviewsState extends State<Reviews> {
                                       return Text(
                                           (snapshot.data as DocumentSnapshot)
                                               .get("name"),
-                                          style: TextStyle(fontSize: 20));
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold));
+                                  }
+                                }),
+                            FutureBuilder(
+                                future: _carregarFilme(review["filmeId"]),
+                                builder: (context, snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.none:
+                                    case ConnectionState.waiting:
+                                      return Container(
+                                        color: Colors.white,
+                                        height: 12,
+                                        width: 50,
+                                      );
+                                    default:
+                                      return SizedBox(
+                                        child: Text(
+                                          (snapshot.data
+                                              as Map<String, dynamic>)["title"],
+                                          style: TextStyle(fontSize: 20),
+                                          maxLines: 1,
+                                          softWrap: true,
+                                        ),
+                                        width: 310,
+                                      );
                                   }
                                 }),
                             Text(
                               nota,
                               style: TextStyle(fontSize: 20),
-                            )
+                            ),
+                            Text(
+                              review['descricao'],
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                              ),
+                              textAlign: TextAlign.start,
+                              maxLines: 2,
+                            ),
                           ],
                         ),
                         Spacer(), // Adiciona um espaçamento flexível
-                        Text(
-                          DateFormat('dd/MM/yyyy HH:mm').format(
-                              DateTime.fromMicrosecondsSinceEpoch(
-                                  review['criacao'].microsecondsSinceEpoch)),
-                          style: TextStyle(fontSize: 16),
+                        Column(
+                          children: [
+                            Text(
+                              DateFormat('dd/MM/yy\nHH:mm').format(
+                                  DateTime.fromMicrosecondsSinceEpoch(
+                                      review['criacao']
+                                          .microsecondsSinceEpoch)),
+                              style: TextStyle(fontSize: 16),
+                              textAlign: TextAlign.end,
+                            ),
+                            Text(""),
+                            Text(""),
+                            Text(""),
+                          ],
                         )
                       ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8),
-                    child: Text(
-                      review['descricao'],
-                      style: const TextStyle(
-                        fontSize: 20.0,
-                      ),
-                      maxLines: 2,
                     ),
                   ),
                 ],
