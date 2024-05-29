@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class MediaRepository {
 
-  String chaveApi = "chave_api";
+  String chaveApi = "api_key";
   final String urlBase = 'https://api.themoviedb.org/3';
 
 
@@ -35,17 +35,24 @@ class MediaRepository {
     }
   }
 
-  Future<List<dynamic>> getFilme(String filmeId) async {
-    final String url =
-        '$urlBase/movie/$filmeId?api_key=$chaveApi&language=pt-BR';
+  Future<List<dynamic>> getMidia(String id, String endpoint) async {
+    try {
+      final String url =
+          '$urlBase/$endpoint/$id?api_key=$chaveApi&language=pt-BR';
 
-    final resposta = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url));
 
-    if (resposta.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(resposta.body);
-      return data['results'];
-    } else {
-      throw Exception('Falha ao buscar Conteudo');
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        return [jsonData];
+      } else {
+        var stts = response.statusCode;
+        print(url);
+        throw Exception('Falha ao carregar os dados da mídia. Status Code: $stts');
+      }
+    } catch (e) {
+      print('Erro ao carregar os dados da mídia: $e');
+      return Future.error('Erro ao carregar os dados da mídia');
     }
   }
 

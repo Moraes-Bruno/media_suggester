@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'Midia.dart';
+
 class Suggestion {
-  final String filmes;
-  final String series;
+  final List<dynamic> filmes;
+  final List<dynamic> series;
 
   Suggestion({
     required this.filmes,
@@ -11,8 +13,16 @@ class Suggestion {
 
   factory Suggestion.fromDocumentSnapshot(DocumentSnapshot snapshot) {
     return Suggestion(
-      filmes: snapshot.get('filmes'),
-      series: snapshot.get('series'),
+      filmes: snapshot.get('filmes') as List<dynamic>,
+      series: snapshot.get('series') as List<dynamic>,
+    );
+  }
+
+  factory Suggestion.fromGeneratedInput(
+      List<dynamic> filmes, List<dynamic> series) {
+    return Suggestion(
+      filmes: filmes,
+      series: series,
     );
   }
 }

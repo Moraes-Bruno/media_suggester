@@ -123,10 +123,6 @@ class _ReviewsState extends State<Reviews> {
     );
   }
 
-  /*_carregarFilme(String filmeId) async {
-    await _mediaRepository.getFilme(filmeId);
-  }*/
-
   _obterComentarios(BuildContext context, AsyncSnapshot snapshot) {
     List<dynamic> listReviewsTemp =
         snapshot.data.docs; //.map((doc) => doc.data()).toList();
