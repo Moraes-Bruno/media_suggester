@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
 
         print('Usuário logado: ${user.displayName}');
         verificarPreferencia(user.uid).then((value){
-          value ? Navigator.push(context, MaterialPageRoute(builder: (context)=>Home(user)))
+          value ?  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(_auth.currentUser)))
               : Navigator.push(context, MaterialPageRoute(builder: (context)=>Genre_movie()));
         });
       }

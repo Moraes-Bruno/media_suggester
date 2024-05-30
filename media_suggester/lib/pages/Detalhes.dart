@@ -114,7 +114,7 @@ class _DetalhesState extends State<Detalhes> {
           backgroundColor: Theme.of(context).colorScheme.primary,
           centerTitle: true,
           title: Text(
-            widget.media['title'] ?? widget.media['original_name'],
+            widget.media['title'] ?? widget.media['original_name'] ?? '',
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold),
           ),
@@ -149,7 +149,7 @@ class _DetalhesState extends State<Detalhes> {
             children: [
               Stack(children: [
                 Container(
-                  width: 400,
+                  width: 450,
                   height: 260,
                   child: Image(
                     image: NetworkImage(
@@ -169,7 +169,7 @@ class _DetalhesState extends State<Detalhes> {
                           ElevatedButton(
                             onPressed: () {
                               _favoritar(widget.media['title'] ??
-                                  widget.media['original_name']);
+                                  widget.media['original_name'] ?? '');
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -217,7 +217,7 @@ class _DetalhesState extends State<Detalhes> {
                 child: Column(
                   children: [
                     Text(
-                      widget.media['title'] ?? widget.media['original_name'],
+                      widget.media['title'] ?? widget.media['original_name'] ?? '',
                       maxLines: 2,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -232,12 +232,12 @@ class _DetalhesState extends State<Detalhes> {
                     ),
                     Wrap(
                       alignment: WrapAlignment.center,
-                      spacing: 8, // Espaçamento entre os gêneros
+                      spacing: 6, // Espaçamento entre os gêneros
                       runSpacing: 8, // Espaçamento entre as linhas
                       children: [
-                        for (var genreId in widget.media['genre_ids'])
+                        for (var genero in widget.media['genre_ids'])
                           Text(
-                            '${_generos[genreId] ?? ''}',
+                            '| ${genero ?? ''} |',
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -255,7 +255,7 @@ class _DetalhesState extends State<Detalhes> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Criticos',
+                                'Críticos',
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
@@ -267,7 +267,7 @@ class _DetalhesState extends State<Detalhes> {
                               ),
                               SizedBox(width: 16),
                               Text(
-                                'Usuarios',
+                                'Usuários',
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
@@ -298,10 +298,14 @@ class _DetalhesState extends State<Detalhes> {
                     const SizedBox(
                       height: 15,
                     ),
-                    Text(
-                      widget.media['overview'],
-                      style: const TextStyle(fontSize: 20),
-                      maxLines: 11,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        widget.media['overview'],
+                        style: const TextStyle(fontSize: 20),
+                        textAlign: TextAlign.justify,
+                        maxLines: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -329,7 +333,7 @@ class _DetalhesState extends State<Detalhes> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            _procurarGoogle(widget.media['title']);
+                            _procurarGoogle(widget.media['title'] ?? widget.media['original_name'] );
                           },
                           child: Container(
                             width: 60,

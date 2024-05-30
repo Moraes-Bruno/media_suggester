@@ -58,7 +58,7 @@ class _FavoritoState extends State<Favorito> {
 
       List<dynamic> mediaTemp = [];
       for (String favorito in favoritos) {
-        final result = await mediaRepository.pesquisarMedia(favorito);
+        final result = await mediaRepository.searchMedia(favorito);
         final firstValidMedia = result
             .where((movie) =>
                 movie['title'] != null &&
@@ -87,7 +87,7 @@ class _FavoritoState extends State<Favorito> {
 
   Future<void> procurarMedia(String query) async {
     try {
-      final result = await mediaRepository.pesquisarMedia(query);
+      final result = await mediaRepository.searchMedia(query);
       final firstValidMedia = result
           .where((movie) =>
               movie['title'] != null &&

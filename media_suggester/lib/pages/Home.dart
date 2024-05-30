@@ -28,9 +28,6 @@ class _HomeState extends State<Home> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Widget? _body;
 
-  List<List<dynamic>> _filmesPorGenero = [];
-  List<List<dynamic>> _seriesPorGenero = [];
-
   _HomeState(this.user);
 
   User? user;
@@ -81,8 +78,6 @@ class _HomeState extends State<Home> {
           List<SugestoesPorGenero>? sugestoesFilmesValidadas =
               await verificarSeApiPossuiDadosDasSugestoesGeradas(
                   sugestoes_filmes!, preferencias_filmes, "movie");
-
-          print("teste");
 
           List<Map<String, dynamic>> sugestoesFilmesFormatadasParaRegistro =
               await formatarParaFirestore(sugestoesFilmesValidadas);
@@ -135,18 +130,16 @@ class _HomeState extends State<Home> {
       for (SugestoesPorGenero listaSugestoes in sugestoesPorGenero) {
         List<Midia> midiasDoGenero = []; // Inicialize a lista aqui
         for (Midia midia in listaSugestoes.midias) {
-          var midias = await _mediaRepository.pesquisarMedia(midia.titulo!);
+          var midias = await _mediaRepository.searchMedia(midia.titulo!);
           if (midias.isNotEmpty) {
             var m = midias.firstWhere(
                 (m) =>
-                    (m['title'] == midia.titulo ||
-                        m['original_name'] == midia.titulo ||
-                        m['name'] == midia.titulo) &&
+                    (m['title'] == midia.titulo || m['name'] == midia.titulo) &&
                     m['media_type'] == tipoMidia,
                 orElse: () => null);
             if (m != null) {
               midiasDoGenero.add(Midia(
-                  titulo: m["title"] ?? m["original_name"] ?? m["name"] ?? '',
+                  titulo: m["title"] ?? m["name"] ?? '',
                   ondeAssistir: midia.ondeAssistir,
                   id: m["id"] ?? 0));
             }
@@ -210,10 +203,10 @@ class _HomeState extends State<Home> {
     try {
       if (sugestoes == null) return SizedBox.shrink();
 
-// Carrega os filmes em lotes
+      // Carrega os filmes em lotes
       int filmeIndex = 0;
       const int filmesBatchSize = 10;
-      List<Map<int, List<Map<String, dynamic>>>> resultsFilmes = [];
+      List<Map<String, dynamic>> postersFilmes = [];
       List<Future<List<dynamic>>> filmesBatch = [];
       while (filmeIndex < sugestoes.filmes.length) {
         for (int i = 0;
@@ -221,19 +214,27 @@ class _HomeState extends State<Home> {
             i++) {
           Map<String, dynamic> generoMap = sugestoes.filmes[filmeIndex];
           generoMap.forEach((generoId, midias) {
+            int i = 0;
             for (Map<String, dynamic> midia in midias) {
               filmesBatch.add(
                 _mediaRepository
                     .getMidia(midia['id'].toString(), "movie")
-                    .then((midia) {
+                    .then((m) {
                   Map<String, dynamic> midiaCopia = {
-                    'id': int.parse(midia[0]['id'].toString()),
-                    'poster_path': midia[0]['poster_path'],
+                    'id': int.parse(m[i]['id'].toString()),
+                    'poster_path': m[i]['poster_path'],
+                    'vote_average': m[i]['vote_average'],
+                    'overview': m[i]['overview'],
+                    'genre_ids': m[i]['genres'].map((genre) {
+                          return genre['id'];
+                        }).toList() ??
+                        [],
+                    'title': m[i]['title'],
+                    'release_date': m[i]['release_date'],
+                    'onde_assistir': midia['ondeAssistir']
                   };
-                  resultsFilmes.add({
-                    int.parse(generoId): [midiaCopia]
-                  });
-                  return midia;
+                  postersFilmes.add(midiaCopia);
+                  return m;
                 }),
               );
             }
@@ -244,10 +245,10 @@ class _HomeState extends State<Home> {
         filmesBatch.clear();
       }
 
-// Carrega as séries em lotes
+      // Carrega as séries em lotes
       int serieIndex = 0;
       const int seriesBatchSize = 10;
-      List<Map<int, List<Map<String, dynamic>>>> resultsSeries = [];
+      List<Map<String, dynamic>> postersSeries = [];
       List<Future<List<dynamic>>> seriesBatch = [];
       while (serieIndex < sugestoes.series.length) {
         for (int i = 0;
@@ -260,15 +261,22 @@ class _HomeState extends State<Home> {
               seriesBatch.add(
                 _mediaRepository
                     .getMidia(midia['id'].toString(), "tv")
-                    .then((midia) {
+                    .then((m) {
                   Map<String, dynamic> midiaCopia = {
-                    'id': int.parse(midia[i]['id'].toString()),
-                    'poster_path': midia[i]['poster_path'],
+                    'id': int.parse(m[i]['id'].toString()),
+                    'poster_path': m[i]['poster_path'],
+                    'vote_average': m[i]['vote_average'],
+                    'overview': m[i]['overview'],
+                    'genre_ids': m[i]['genres'].map((genre) {
+                          return genre['id'];
+                        }).toList() ??
+                        [],
+                    'original_name': m[i]['original_name'],
+                    'first_air_date': m[i]['first_air_date'],
+                    'onde_assistir': midia['ondeAssistir']
                   };
-                  resultsSeries.add({
-                    int.parse(generoId): [midiaCopia]
-                  });
-                  return midia;
+                  postersSeries.add(midiaCopia);
+                  return m;
                 }),
               );
             }
@@ -283,96 +291,137 @@ class _HomeState extends State<Home> {
         List<Widget> filmesWidgets = [];
         List<Widget> seriesWidgets = [];
 
-// Iterar sobre os mapas de gêneros
-        for (var generoMap in resultsFilmes) {
-          int generoId = generoMap.keys.first;
-          List<Map<String, dynamic>> midias = generoMap.values.first;
+        var generosFilmes =
+            await _mediaRepository.fetchGeneros(firstAirDate: null);
+        var generosSeries =
+            await _mediaRepository.fetchGeneros(firstAirDate: "123");
 
-          // Criar um carrousel para as mídias do gênero
-          Widget carrouselFilme = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Gênero $generoId",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+        // Iterar sobre os mapas de gêneros
+        for (var midiasDoGenero in sugestoes.filmes) {
+          midiasDoGenero.forEach((key, value) {
+            List<Widget> midias = [];
+            for (var midia in value) {
+              String id = midia['id'];
+              //String ondeAssistir = midia['ondeAssistir'];
+              String posterPath = postersFilmes
+                  .where((m) => m['id'].toString() == id)
+                  .first['poster_path'];
+              var card = _ObterCard(
+                  context,
+                  postersFilmes.where((m) => m['id'].toString() == id).first,
+                  posterPath);
+              midias.add(card);
+            }
+
+            var nomeGenero = generosFilmes[int.parse(key)];
+
+            //Criar um carrousel para as mídias do gênero
+            var carrouselFilme = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                  child: Text(
+                    "$nomeGenero",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
-              ),
-              CarouselSlider(
-                options: CarouselOptions(
-                  aspectRatio: 16 / 9,
-                  viewportFraction: 1 / 3,
-                  enlargeCenterPage: false,
-                ),
-                items: midias.map((midia) {
-                  return _ObterCard(context, midia);
-                }).toList(),
-              ),
-              SizedBox(height: 20),
-            ],
-          );
-
-          filmesWidgets.add(carrouselFilme);
+                CarouselSlider(
+                    options: CarouselOptions(
+                      aspectRatio: 16 / 9,
+                      viewportFraction: 1 / 3,
+                      enlargeCenterPage: false,
+                    ),
+                    items: midias),
+                SizedBox(height: 20),
+              ],
+            );
+            filmesWidgets.add(carrouselFilme);
+          });
         }
 
-        for (var generoMap in resultsSeries) {
-          int generoId = generoMap.keys.first;
-          List<Map<String, dynamic>> midias = generoMap.values.first;
+        for (var midiasDoGenero in sugestoes.series) {
+          midiasDoGenero.forEach((key, value) {
+            List<Widget> midias = [];
+            for (var midia in value) {
+              String id = midia['id'];
+              //String ondeAssistir = midia['ondeAssistir'];
+              String posterPath = postersSeries
+                  .where((m) => m['id'].toString() == id)
+                  .first['poster_path'];
+              var card = _ObterCard(
+                  context,
+                  postersSeries.where((m) => m['id'].toString() == id).first,
+                  posterPath);
+              midias.add(card);
+            }
 
-          // Criar um carrousel para as mídias do gênero
-          Widget carrouselSerie = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Gênero $generoId",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+            var nomeGenero = generosSeries[int.parse(key)];
+
+            //Criar um carrousel para as mídias do gênero
+            var carrouselSerie = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                  child: Text(
+                    "$nomeGenero",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
-              ),
-              CarouselSlider(
-                options: CarouselOptions(
-                  aspectRatio: 16 / 9,
-                  viewportFraction: 1 / 3,
-                  enlargeCenterPage: false,
-                ),
-                items: midias.map((midia) {
-                  return _ObterCard(context, midia);
-                }).toList(),
-              ),
-              SizedBox(height: 20),
-            ],
-          );
-          seriesWidgets.add(carrouselSerie);
+                CarouselSlider(
+                    options: CarouselOptions(
+                      aspectRatio: 16 / 9,
+                      viewportFraction: 1 / 3,
+                      enlargeCenterPage: false,
+                    ),
+                    items: midias),
+                SizedBox(height: 20),
+              ],
+            );
+            seriesWidgets.add(carrouselSerie);
+          });
         }
+
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Seção de Filmes
-              Text("FILMES",
-                  style: TextStyle(
-                    fontSize: 40,
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
-                  )),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "FILMES",
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 16.0),
               ...filmesWidgets,
-              SizedBox(height: 32.0),
+              SizedBox(height: 64.0),
               // Seção de Séries
-              Text("SÉRIES",
-                  style: TextStyle(
-                    fontSize: 40,
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
-                  )),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("SÉRIES",
+                      style: TextStyle(
+                        fontSize: 50,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      )),
+                ],
+              ),
               SizedBox(height: 16.0),
               ...seriesWidgets,
             ],
@@ -456,7 +505,12 @@ class _HomeState extends State<Home> {
         height: MediaQuery.of(context).size.height -
             kToolbarHeight -
             kBottomNavigationBarHeight,
-        child: _body,
+        child: _body ?? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+          ],
+        ),
       ),
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -513,15 +567,13 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _ObterCard(BuildContext context, dynamic midia) {
+  Widget _ObterCard(
+      BuildContext context, Map<String, dynamic> midia, String posterPath) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Detalhes(midia) // Aqui você precisa passar o ID do filme
-              ),
+          MaterialPageRoute(builder: (context) => Detalhes(midia)),
         );
       },
       child: Container(
@@ -529,40 +581,10 @@ class _HomeState extends State<Home> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
           child: Image.network(
-            'https://image.tmdb.org/t/p/w200/${midia['poster_path']}',
+            'https://image.tmdb.org/t/p/w200/${posterPath}',
           ),
         ),
       ),
-    );
-  }
-
-  // Função para criar um carrousel com as mídias
-  Widget _ObterCarrousel(int generoId, List<Map<String, dynamic>> midias) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            "Gênero $generoId",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-        CarouselSlider(
-          options: CarouselOptions(
-            aspectRatio: 16 / 9,
-            viewportFraction: 1 / 3,
-            enlargeCenterPage: false,
-          ),
-          items: midias.map((midia) {
-            return _ObterCard(context, midia);
-          }).toList(),
-        ),
-        SizedBox(height: 20),
-      ],
     );
   }
 
@@ -576,5 +598,11 @@ class _HomeState extends State<Home> {
     } catch (e) {
       return false;
     }
+  }
+
+  _carregarMidia(String id, String endpoint) async {
+    Map<String, dynamic> midia =
+        await _mediaRepository.getMidia(id, endpoint) as Map<String, dynamic>;
+    return midia;
   }
 }

@@ -24,7 +24,7 @@ class _PesquisaState extends State<Pesquisa> {
 
   Future<void> procurarMedia(String query) async {
     try {
-      final result = await mediaRepository.pesquisarMedia(query);
+      final result = await mediaRepository.searchMedia(query);
       setState(() {
         media = result
             .where((movie) =>
@@ -33,6 +33,8 @@ class _PesquisaState extends State<Pesquisa> {
                 movie['poster_path'] != null)
             .toList();
       });
+
+      print(media);
     } catch (error) {
       // Lidar com erros
       print('Erro ao pesquisar filmes: $error');

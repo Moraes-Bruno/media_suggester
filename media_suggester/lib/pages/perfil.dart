@@ -41,7 +41,7 @@ class Perfil extends StatelessWidget {
 
       List<dynamic> mediaTemp = [];
       for (String favorito in favoritos) {
-        final result = await mediaRepository.pesquisarMedia(favorito);
+        final result = await mediaRepository.searchMedia(favorito);
         final firstValidMedia = result
             .where((movie) =>
                 movie['title'] != null &&
