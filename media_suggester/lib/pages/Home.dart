@@ -109,8 +109,12 @@ class _HomeState extends State<Home> {
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot);
         }
 
-        _body = await _carregarMedias(
-            sugestoes); // Carregue os dados da API ao inicializar a tela
+        setState(() async {
+          _carregarMedias(sugestoes).then((response) {
+            _body = response;
+            setState(() {}); //refresh
+          }); // Carregue os dados da API ao inicializar a tela
+        });
       });
     } catch (e) {
       print(e);
@@ -202,7 +206,9 @@ class _HomeState extends State<Home> {
   Future<Widget?> _carregarMedias(Suggestion? sugestoes) async {
     try {
       if (sugestoes == null) return SizedBox.shrink();
-
+      print("carregando dados...");
+      print(sugestoes.filmes);
+      print(sugestoes.series);
       // Carrega os filmes em lotes
       int filmeIndex = 0;
       const int filmesBatchSize = 10;
@@ -288,6 +294,7 @@ class _HomeState extends State<Home> {
       }
 
       if (mounted) {
+        print("depois das variáveis future");
         List<Widget> filmesWidgets = [];
         List<Widget> seriesWidgets = [];
 
@@ -302,7 +309,6 @@ class _HomeState extends State<Home> {
             List<Widget> midias = [];
             for (var midia in value) {
               String id = midia['id'];
-              //String ondeAssistir = midia['ondeAssistir'];
               String posterPath = postersFilmes
                   .where((m) => m['id'].toString() == id)
                   .first['poster_path'];
@@ -320,7 +326,8 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                  padding:
+                      const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
                   child: Text(
                     "$nomeGenero",
                     style: const TextStyle(
@@ -366,7 +373,8 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                  padding:
+                      const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
                   child: Text(
                     "$nomeGenero",
                     style: const TextStyle(
@@ -505,12 +513,14 @@ class _HomeState extends State<Home> {
         height: MediaQuery.of(context).size.height -
             kToolbarHeight -
             kBottomNavigationBarHeight,
-        child: _body ?? Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-          ],
-        ),
+        child: _body == null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                ],
+              )
+            : _body,
       ),
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

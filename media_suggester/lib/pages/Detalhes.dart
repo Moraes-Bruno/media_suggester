@@ -118,25 +118,6 @@ class _DetalhesState extends State<Detalhes> {
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Colors.white),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.person,
-                          color: Theme.of(context).colorScheme.secondary),
-                      padding: const EdgeInsetsDirectional.all(8.0),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
           leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
@@ -237,7 +218,7 @@ class _DetalhesState extends State<Detalhes> {
                       children: [
                         for (var genero in widget.media['genre_ids'])
                           Text(
-                            '| ${genero ?? ''} |',
+                            '| ${_generos[genero] ?? ''} |',
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,

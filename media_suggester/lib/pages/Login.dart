@@ -26,7 +26,8 @@ class _LoginState extends State<Login> {
     _checkIfLoggedIn().then((loggedIn) {
       if (loggedIn) {
         // Se o usuário já está logado, redirecionar para a página Home
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(_auth.currentUser)));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => Home(_auth.currentUser)));
       }
     });
   }
@@ -51,19 +52,22 @@ class _LoginState extends State<Login> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
         // Verificar se o documento do usuário existe no Firestore
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        final userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
 
         if (!userDoc.exists) {
           // Se o documento não existir, criar um novo documento com as informações do usuário
@@ -72,14 +76,18 @@ class _LoginState extends State<Login> {
             'email': user.email,
             'favoritos': [],
             'photoUrl': user.photoURL,
-
           });
         }
 
         print('Usuário logado: ${user.displayName}');
-        verificarPreferencia(user.uid).then((value){
-          value ?  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(_auth.currentUser)))
-              : Navigator.push(context, MaterialPageRoute(builder: (context)=>Genre_movie()));
+        verificarPreferencia(user.uid).then((value) {
+          value
+              ? Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Home(_auth.currentUser)))
+              : Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Genre_movie()));
         });
       }
     } catch (e) {
@@ -99,7 +107,7 @@ class _LoginState extends State<Login> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/home_background.png"),
+                image: AssetImage("assets/images/background.png"),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
               ),
@@ -109,50 +117,51 @@ class _LoginState extends State<Login> {
               children: [
                 Container(
                   decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/logo_teste.png"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  height: 280,
-                  width: 200,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 40,fontWeight: FontWeight.bold),
-                  ),
+                      image: DecorationImage(
+                        image: AssetImage("assets/images/novo_logo.png"),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(150))),
+                  height: 400,
+                  width: 400,
                 ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(
-                      height: 50,
-                      width: 150,
+                      height: 60,
+                      width: 160,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signInWithGoogle,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSecondary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
                         child: _isLoading
                             ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 3,
-                          ),
-                        )
-                            : const Text(
-                          "Entrar",
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: const Text(
+                                  "Entrar",
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -168,7 +177,9 @@ class _LoginState extends State<Login> {
   static Future<bool> verificarPreferencia(String userId) async {
     try {
       DocumentSnapshot user = await FirebaseFirestore.instance
-          .collection("preferences").doc(userId).get();
+          .collection("preferences")
+          .doc(userId)
+          .get();
       //.where("token_google", isEqualTo: "12345x")
       // Se houver documentos encontrados, retorna true
       print(user.exists);

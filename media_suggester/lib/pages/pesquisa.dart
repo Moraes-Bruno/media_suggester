@@ -28,13 +28,11 @@ class _PesquisaState extends State<Pesquisa> {
       setState(() {
         media = result
             .where((movie) =>
-                movie['title'] != null &&
+                (movie['title'] != null || movie['original_name'] != null) &&
                 movie['overview'] != null &&
                 movie['poster_path'] != null)
             .toList();
       });
-
-      print(media);
     } catch (error) {
       // Lidar com erros
       print('Erro ao pesquisar filmes: $error');
@@ -45,34 +43,13 @@ class _PesquisaState extends State<Pesquisa> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white, size: 30),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        centerTitle: true,
-        title: const Text(
-          "PESQUISAR",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.white),
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.person,
-                        color: Theme.of(context).colorScheme.secondary,
-                        size: 30),
-                    padding: const EdgeInsetsDirectional.all(8.0),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ],
-      ),
+          iconTheme: const IconThemeData(color: Colors.white, size: 30),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          centerTitle: true,
+          title: const Text(
+            "PESQUISAR",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          )),
       body: Column(
         children: [
           SingleChildScrollView(
@@ -98,39 +75,54 @@ class _PesquisaState extends State<Pesquisa> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: media.length,
-              itemBuilder: (context, index) {
-                final movie = media[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Detalhes(movie),
+            child: media.length > 0
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: media.length,
+                    itemBuilder: (context, index) {
+                      final movie = media[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Detalhes(movie),
+                            ),
+                          );
+                        },
+                        child: ListTile(
+                          title: Text(
+                            movie['title'] ?? movie['original_name'],
+                            maxLines: 2,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            movie['overview'],
+                            maxLines: 3,
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          leading: Image.network(
+                            'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image(
+                        image: AssetImage("assets/images/pesquisa.png"),
+                        height: 400,
+                        width: 400,
                       ),
-                    );
-                  },
-                  child: ListTile(
-                    title: Text(
-                      movie['title'],
-                      maxLines: 2,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      movie['overview'],
-                      maxLines: 3,
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    leading: Image.network(
-                      'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
-                    ),
+                      Text(
+                        "Não encontramos nenhum registro...",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
