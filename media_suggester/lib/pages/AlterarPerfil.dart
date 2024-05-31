@@ -1,7 +1,6 @@
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/CadastroPreferencias.dart';
 
 class Alterar extends StatelessWidget {
@@ -9,7 +8,46 @@ class Alterar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+    final TextEditingController _controller = TextEditingController();
+
+     void showConfirmationDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Apelido Atualizado"),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+    // ignore: non_constant_identifier_names
+    void AlterarPerfil(String nickname) async {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .update({'nickname': nickname != "" ? nickname: user?.displayName});
+
+            // ignore: use_build_context_synchronously
+            showConfirmationDialog(context, 'Apelido atualizado com sucesso');
+      } catch (e) {
+        null;
+      }
+    }
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white, size: 30),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -39,140 +77,150 @@ class Alterar extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(top: 40, bottom: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user?.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            var userData = snapshot.data!.data() as Map<String, dynamic>;
+            return SingleChildScrollView(
               child: Container(
-                child: Text(
-                  'ALTERAR FOTO DE PERFIL',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            Container(
-              child: IconButton(
-                icon: const Icon(Icons.account_circle),
-                iconSize: 120,
-                color: Colors.white,
-                onPressed: () {},
-              ),
-            ),
-            Center(
-              child: Text('Clique para selecionar uma foto',style: TextStyle(fontSize: 16 ),),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 40),
-              child: SizedBox(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Text(
-                          'ALTERAR EMAIL',
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.only(top: 40, bottom: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Container(
+                        child: const Text(
+                          'ALTERAR FOTO DE PERFIL',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: TextField(
-                          style: const TextStyle(fontSize: 16),
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: SizedBox(
+                          height: 120,
+                          width: 120,
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image(
+                                image: NetworkImage(userData['photoUrl']),
+                                fit: BoxFit.cover,
                               ),
-                              filled: true,
-                              fillColor:
-                                  Theme.of(context).colorScheme.inversePrimary,
-                              hintText: "joagana@mediasuggester.com",
-                              hintStyle: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.tertiary)),
-                        ),
+                            ),
+                          )),
+                    ),
+                    const Center(
+                      child: Text(
+                        'Clique para selecionar uma foto',
+                        style: TextStyle(fontSize: 16),
                       ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Container(
-                          child: Text(
-                            'ALTERAR SENHA',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 40),
+                      child: SizedBox(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                child: const Text(
+                                  'ALTERAR APELIDO',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: TextField(
+                                  controller: _controller,
+                                  style: const TextStyle(fontSize: 16),
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary,
+                                      hintText: userData['nickname'],
+                                      hintStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .tertiary)),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: TextField(
-                          style: const TextStyle(fontSize: 16),
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              filled: true,
-                              fillColor:
-                                  Theme.of(context).colorScheme.inversePrimary,
-                              hintText: "123456789",
-                              hintStyle: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.tertiary)),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
+                      width: 264,
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          String nickname = _controller.text;
+                          AlterarPerfil(nickname);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
+                        child: Text(
+                          'SALVAR DADOS ALTERADOS',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
+                      width: 264,
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CadastroPreferencias()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
+                        child: Text(
+                          'ALTERAR GENERO',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary),
+                        ),
+                      ),
+                    ),
+                    //--------------------------------
+                  ],
                 ),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 16, bottom: 16),
-              width: 264,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text(
-                  'SALVAR DADOS ALTERADOS',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.inversePrimary),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-            ),
-                        Container(
-              margin: EdgeInsets.only(top: 16, bottom: 16),
-              width: 248,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: () {
-                   Navigator.push(
-                context, MaterialPageRoute(builder: (context) => CadastroPreferencias()));
-                },
-                child: Text(
-                  'ALTERAR GENERO',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.inversePrimary),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-            ),
-            //--------------------------------
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 
@@ -185,7 +233,7 @@ class Alterar extends StatelessWidget {
       return Builder(
         builder: (BuildContext context) {
           return Container(
-            child: Image(
+            child: const Image(
                 image: AssetImage('assets/images/vertical_placeholder.jpg'),
                 width: 300,
                 height: 200),

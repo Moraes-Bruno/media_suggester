@@ -75,6 +75,7 @@ class _LoginState extends State<Login> {
             'name': user.displayName,
             'email': user.email,
             'favoritos': [],
+            'nickname': user.displayName,
             'photoUrl': user.photoURL,
           });
         }
