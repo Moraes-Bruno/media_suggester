@@ -42,6 +42,7 @@ class _PesquisaState extends State<Pesquisa> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white, size: 30),
           backgroundColor: Theme.of(context).colorScheme.primary,

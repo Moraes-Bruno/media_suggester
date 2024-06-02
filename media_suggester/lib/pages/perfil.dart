@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/AlterarPerfil.dart';
 import 'package:media_suggester/pages/Detalhes.dart';
 import 'package:media_suggester/pages/favorito.dart';
@@ -13,7 +14,7 @@ class Perfil extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
   final MediaRepository mediaRepository = MediaRepository();
 
-  Future<Map<String, dynamic>> _getUserData() async {
+  /*Future<Map<String, dynamic>> _getUserData() async {
     if (user != null) {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -24,7 +25,7 @@ class Perfil extends StatelessWidget {
       }
     }
     return {};
-  }
+  }*/
 
   Future<List<dynamic>> _fetchFavoritos(String userId) async {
     List<String> favoritos = [];
@@ -94,20 +95,13 @@ class Perfil extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _getUserData(),
-        builder: (BuildContext context,
-            AsyncSnapshot<Map<String, dynamic>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(
-                child: Text("Erro ao carregar os dados do usuário"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-                child: Text("Nenhum dado do usuário encontrado"));
-          } else {
-            Map<String, dynamic> userData = snapshot.data!;
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user?.uid)
+              .snapshots(),
+            builder: (context, snapshot) {
+            var userData = snapshot.data!.data() as Map<String, dynamic>;
             return SingleChildScrollView(
               child: Container(
                 width: MediaQuery.of(context).size.width,
@@ -115,14 +109,18 @@ class Perfil extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image(
-                      image: userData['photoUrl'] != null
-                          ? NetworkImage(userData['photoUrl'])
-                          : const AssetImage(
-                                  'assets/images/profile_placeholder.png')
-                              as ImageProvider,
-                      width: 200,
-                      height: 200,
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                      child: Image(
+                        image: userData['photoUrl'] != null
+                            ? NetworkImage(userData['photoUrl'])
+                            : const AssetImage(
+                                    'assets/images/profile_placeholder.png')
+                                as ImageProvider,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width,
@@ -142,9 +140,15 @@ class Perfil extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
+                              const SizedBox(
+                                height: 10,
+                              ),
                               Text(
-                                'Nome: ${userData['name'] ?? 'Nome não disponível'}',
+                                'Apelido: ${userData['nickname'] ?? 'Apelido não disponível'}',
                                 style: const TextStyle(fontSize: 16),
+                              ),
+                               const SizedBox(
+                                height: 10,
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -228,7 +232,7 @@ class Perfil extends StatelessWidget {
                               child: Text("Nenhum favorito encontrado"));
                         } else {
                           return Padding(
-                            padding: const EdgeInsets.only(left: 10,right: 10),
+                            padding: const EdgeInsets.only(left: 10, right: 10),
                             child: CarouselSlider(
                               items: snapshot.data!.map((item) {
                                 return Builder(
@@ -239,7 +243,8 @@ class Perfil extends StatelessWidget {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => Detalhes(item),
+                                            builder: (context) =>
+                                                Detalhes(item),
                                           ),
                                         );
                                       },
@@ -277,8 +282,7 @@ class Perfil extends StatelessWidget {
               ),
             );
           }
-        },
-      ),
+        ,),
     );
   }
 }
