@@ -107,8 +107,11 @@ class _HomeState extends State<Home> {
 
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot);
         }
-        _carregarMedias(sugestoes).then((response) {
-          _body = response;
+        setState(() {
+          _carregarMedias(sugestoes).then((response) {
+            _body = response;
+            setState(() {}); //refresh
+          });
         });
       });
     } catch (e) {
