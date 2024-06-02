@@ -96,7 +96,6 @@ class _HomeState extends State<Home> {
           } catch (e) {
             print(e);
           }
-          print(5);
           sugestoes = Suggestion.fromGeneratedInput(
               sugestoesFilmesFormatadasParaRegistro,
               sugestoesSeriesFormatadasParaRegistro);
@@ -108,12 +107,8 @@ class _HomeState extends State<Home> {
 
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot);
         }
-
-        setState(() async {
-          _carregarMedias(sugestoes).then((response) {
-            _body = response;
-            setState(() {}); //refresh
-          }); // Carregue os dados da API ao inicializar a tela
+        _carregarMedias(sugestoes).then((response) {
+          _body = response;
         });
       });
     } catch (e) {
@@ -206,9 +201,6 @@ class _HomeState extends State<Home> {
   Future<Widget?> _carregarMedias(Suggestion? sugestoes) async {
     try {
       if (sugestoes == null) return SizedBox.shrink();
-      print("carregando dados...");
-      print(sugestoes.filmes);
-      print(sugestoes.series);
       // Carrega os filmes em lotes
       int filmeIndex = 0;
       const int filmesBatchSize = 10;
@@ -294,7 +286,6 @@ class _HomeState extends State<Home> {
       }
 
       if (mounted) {
-        print("depois das variáveis future");
         List<Widget> filmesWidgets = [];
         List<Widget> seriesWidgets = [];
 
