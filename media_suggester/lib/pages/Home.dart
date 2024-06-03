@@ -125,6 +125,7 @@ class _HomeState extends State<Home> {
           List<Map<String, dynamic>> preferencias,
           String tipoMidia) async {
     List<SugestoesPorGenero>? sugestoesPorGeneroValidadas = [];
+    final List<int?> midiasAdicionadas = [];
     try {
       List<SugestoesPorGenero> sugestoesPorGenero =
           SugestoesPorGenero.fromJsonList(sugestoesGeradas);
@@ -136,14 +137,20 @@ class _HomeState extends State<Home> {
           if (midias.isNotEmpty) {
             var m = midias.firstWhere(
                 (m) =>
-                    (m['title'] == midia.titulo || m['name'] == midia.titulo) &&
-                    m['media_type'] == tipoMidia,
+                    (m['title'] == midia.titulo ||
+                        m['original_title'] == midia.titulo ||
+                        m['name'] == midia.titulo ||
+                        m['original_name'] == midia.titulo) &&
+                    m['media_type'] == tipoMidia &&
+                    !midiasAdicionadas.contains(m["id"]) &&
+                    m["poster_path"] != null, //não repetir mídias,
                 orElse: () => null);
             if (m != null) {
               midiasDoGenero.add(Midia(
-                  titulo: m["title"] ?? m["name"] ?? '',
+                  titulo: m["title"] ?? m["name"] ?? m['original_name'] ?? '',
                   ondeAssistir: midia.ondeAssistir,
                   id: m["id"] ?? 0));
+              midiasAdicionadas.add(m["id"]);
             }
           }
         }
@@ -348,15 +355,14 @@ class _HomeState extends State<Home> {
           midiasDoGenero.forEach((key, value) {
             List<Widget> midias = [];
             for (var midia in value) {
-              String id = midia['id'];
-              //String ondeAssistir = midia['ondeAssistir'];
-              String posterPath = postersSeries
+              String? id = midia['id'];
+              String? posterPath = postersSeries
                   .where((m) => m['id'].toString() == id)
                   .first['poster_path'];
               var card = _ObterCard(
                   context,
                   postersSeries.where((m) => m['id'].toString() == id).first,
-                  posterPath);
+                  posterPath!);
               midias.add(card);
             }
 
