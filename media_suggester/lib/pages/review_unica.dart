@@ -15,12 +15,35 @@ class ReviewUnica extends StatefulWidget {
 class _ReviewUnicaState extends State<ReviewUnica> {
   final MediaRepository _mediaRepository = MediaRepository();
   _carregarFilme(String filmeId) async {
-    Map<String, dynamic> filme = await _mediaRepository.getMidia(filmeId, "movie") as Map<String, dynamic>;
+    Map<String, dynamic> filme = (await _mediaRepository.getMidia(
+        filmeId, "movie"))[0] as Map<String, dynamic>;
     return filme;
+  }
+
+  Map<int, String> _generos = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchGeneros();
+    print(widget.review['filmeId']);
+  }
+
+  Future<void> _fetchGeneros() async {
+    final genres = await _mediaRepository.fetchGeneros();
+    setState(() {
+      _generos = genres;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    String nota = "";
+    for (var i = 0; i < widget.review['nota']; i++) {
+      nota += "★";
+    }
+    nota = nota.padRight(5, "☆");
+
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white, size: 30),
@@ -65,7 +88,7 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                       width: 200.0,
                       height: 200.0,
                       alignment: Alignment.center,
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                         strokeWidth: 5.0,
                       ),
@@ -81,22 +104,22 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                           height: 200,
                           width: 200,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         Text(
                           (snapshot.data as DocumentSnapshot).get("name"),
-                          style: TextStyle(fontSize: 25),
+                          style: const TextStyle(fontSize: 25),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(15.0),
+                          padding: const EdgeInsets.all(15.0),
                           child: Text(
                             widget.review['descricao'],
-                            style: TextStyle(fontSize: 20),
+                            style: const TextStyle(fontSize: 20),
                             textAlign: TextAlign.justify,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 15,
                         ),
                         FutureBuilder(
@@ -111,109 +134,138 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                                     width: 50,
                                   );
                                 default:
-                                  return Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  DateFormat dateFormat =
+                                      DateFormat('dd/MM/yyyy');
+                                  DateTime dateTime = DateTime.parse(
+                                      (snapshot.data as Map<String, dynamic>)[
+                                              'release_date'] ??
+                                          (snapshot.data as Map<String,
+                                              dynamic>)['first_air_date']);
+                                  String dataFormatada =
+                                      dateFormat.format(dateTime);
+                                  return Column(
                                     children: [
-                                      Image(
-                                        image: NetworkImage(
-                                            'https://image.tmdb.org/t/p/w200/' +
-                                                (snapshot.data as Map<String,
-                                                    dynamic>)["poster_path"]),
-                                        height: 200,
-                                        width: 150,
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Image(
+                                            image: NetworkImage(
+                                                'https://image.tmdb.org/t/p/w200/' +
+                                                    (snapshot.data as Map<
+                                                            String, dynamic>)[
+                                                        "poster_path"]),
+                                            height: 200,
+                                            width: 150,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  child: Text(
+                                                    (snapshot.data as Map<
+                                                        String,
+                                                        dynamic>)["title"],
+                                                    style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    maxLines: 3,
+                                                    softWrap: true,
+                                                  ),
+                                                  width: 340,
+                                                ),
+                                                for (var genero
+                                                    in ((snapshot.data as Map<
+                                                                    String,
+                                                                    dynamic>)[
+                                                                'genres']
+                                                            .map((genre) {
+                                                          return genre['id'];
+                                                        }).toList() ??
+                                                        []))
+                                                  Text(
+                                                    _generos[genero] ?? '',
+                                                    style: const TextStyle(
+                                                      fontSize: 20,
+                                                    ),
+                                                  ),
+                                                const SizedBox(
+                                                  height: 40,
+                                                ),
+                                                Text(
+                                                  dataFormatada,
+                                                  style: const TextStyle(
+                                                      fontSize: 20),
+                                                ),
+                                                Text(
+                                                  ((snapshot.data as Map<String,
+                                                                  dynamic>)[
+                                                              "runtime"])
+                                                          .toString() +
+                                                      " Minutos",
+                                                  style: const TextStyle(
+                                                      fontSize: 20),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       Padding(
-                                        padding: EdgeInsets.only(
-                                          top: 8,
-                                        ),
+                                        padding: const EdgeInsets.only(
+                                            left: 18, top: 10, bottom: 15),
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
                                           children: [
-                                            SizedBox(
-                                              child: Text(
-                                                (snapshot.data as Map<String,
-                                                    dynamic>)["title"],
-                                                style: TextStyle(fontSize: 20),
-                                                maxLines: 3,
-                                                softWrap: true,
-                                              ),
-                                              width: 340,
+                                            Row(
+                                              children: [
+                                                const Text(
+                                                  "Criticos: ",
+                                                  style:
+                                                      TextStyle(fontSize: 20),
+                                                ),
+                                                Text(
+                                                  (snapshot.data as Map<String,
+                                                                  dynamic>)[
+                                                              'vote_average']
+                                                          .toStringAsFixed(1) +
+                                                      '/10',
+                                                  style: const TextStyle(
+                                                      fontSize: 20),
+                                                ),
+                                              ],
                                             ),
-                                            Text(
-                                              "Genero 1",
-                                              style: TextStyle(fontSize: 20),
+                                            const SizedBox(
+                                              height: 10,
                                             ),
-                                            Text(
-                                              "Genero 2",
-                                              style: TextStyle(fontSize: 20),
-                                            ),
-                                            Text(
-                                              "Genero 3",
-                                              style: TextStyle(fontSize: 20),
-                                            ),
-                                            SizedBox(
-                                              height: 40,
-                                            ),
-                                            Text(
-                                              /*DateFormat('dd/MM/yy').format(
-                                                  ((snapshot.data as Map<String,
-                                                          dynamic>)[
-                                                      "release_date"])),*/
-                                              "Data Lançamento",
-                                              style: TextStyle(fontSize: 20),
-                                            ),
-                                            Text(
-                                              ((snapshot.data as Map<String,
-                                                          dynamic>)["runtime"])
-                                                      .toString() +
-                                                  " Minutos",
-                                              style: TextStyle(fontSize: 20),
-                                            ),
+                                            Row(
+                                              children: [
+                                                const Text(
+                                                  "Usuário: ",
+                                                  style:
+                                                      TextStyle(fontSize: 20),
+                                                ),
+                                                Text(
+                                                  nota,
+                                                  style: const TextStyle(
+                                                      fontSize: 20),
+                                                ),
+                                              ],
+                                            )
                                           ],
                                         ),
-                                      ),
+                                      )
                                     ],
                                   );
                               }
                             }),
-                        Padding(
-                          padding:
-                              EdgeInsets.only(left: 18, top: 10, bottom: 15),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    "Criticos: ",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                  Text(
-                                    "★★★★☆",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Usuarios: ",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                  Text(
-                                    "★★★★★",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        )
                       ],
                     );
                 }

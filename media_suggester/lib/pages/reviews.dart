@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -24,8 +22,10 @@ class _ReviewsState extends State<Reviews> {
         listReviews = _firestore
             .collection('reviews')
             .limit(10)
-            .where('descricao', isEqualTo: busca)
-            .orderBy('criacao', descending: true)
+            .where('descricao',
+                isGreaterThanOrEqualTo: busca,
+                isLessThan: busca.substring(0, busca.length - 1) +
+                    String.fromCharCode(busca.codeUnitAt(busca.length - 1) + 1))
             .get();
       });
     } else {
@@ -100,7 +100,7 @@ class _ReviewsState extends State<Reviews> {
             ),
             //tres pontos(...) expande a lista de widgets em uma lista de argumentos
             Padding(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               child: FutureBuilder(
                 future: listReviews,
                 builder: (context, snapshot) {
@@ -111,7 +111,7 @@ class _ReviewsState extends State<Reviews> {
                         width: 200.0,
                         height: 200.0,
                         alignment: Alignment.center,
-                        child: CircularProgressIndicator(
+                        child: const CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.black),
                           strokeWidth: 5.0,
@@ -133,7 +133,8 @@ class _ReviewsState extends State<Reviews> {
   }
 
   _carregarFilme(String filmeId) async {
-    Map<String, dynamic> filme = await _mediaRepository.getMidia(filmeId, "movie") as Map<String, dynamic>;
+    Map<String, dynamic> filme = (await _mediaRepository.getMidia(
+        filmeId, "movie"))[0] as Map<String, dynamic>;
     return filme;
   }
 
@@ -165,7 +166,7 @@ class _ReviewsState extends State<Reviews> {
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Row(
                       children: [
                         FutureBuilder(
@@ -174,7 +175,7 @@ class _ReviewsState extends State<Reviews> {
                               switch (snapshot.connectionState) {
                                 case ConnectionState.none:
                                 case ConnectionState.waiting:
-                                  return Image(
+                                  return const Image(
                                     image: AssetImage(
                                         "assets/images/profile_placeholder.png"),
                                     height: 45,
@@ -191,7 +192,7 @@ class _ReviewsState extends State<Reviews> {
                               }
                             }),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         Column(
@@ -212,7 +213,7 @@ class _ReviewsState extends State<Reviews> {
                                       return Text(
                                           (snapshot.data as DocumentSnapshot)
                                               .get("name"),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold));
                                   }
@@ -233,7 +234,7 @@ class _ReviewsState extends State<Reviews> {
                                         child: Text(
                                           (snapshot.data
                                               as Map<String, dynamic>)["title"],
-                                          style: TextStyle(fontSize: 20),
+                                          style: const TextStyle(fontSize: 20),
                                           maxLines: 1,
                                           softWrap: true,
                                         ),
@@ -243,7 +244,7 @@ class _ReviewsState extends State<Reviews> {
                                 }),
                             Text(
                               nota,
-                              style: TextStyle(fontSize: 20),
+                              style: const TextStyle(fontSize: 20),
                             ),
                             Text(
                               review['descricao'],
@@ -255,7 +256,7 @@ class _ReviewsState extends State<Reviews> {
                             ),
                           ],
                         ),
-                        Spacer(), // Adiciona um espaçamento flexível
+                        const Spacer(), // Adiciona um espaçamento flexível
                         Column(
                           children: [
                             Text(
@@ -263,12 +264,12 @@ class _ReviewsState extends State<Reviews> {
                                   DateTime.fromMicrosecondsSinceEpoch(
                                       review['criacao']
                                           .microsecondsSinceEpoch)),
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                               textAlign: TextAlign.end,
                             ),
-                            Text(""),
-                            Text(""),
-                            Text(""),
+                            const Text(""),
+                            const Text(""),
+                            const Text(""),
                           ],
                         )
                       ],
@@ -281,7 +282,6 @@ class _ReviewsState extends State<Reviews> {
         ),
       ));
     }
-    ;
     return widgets;
   }
 }
