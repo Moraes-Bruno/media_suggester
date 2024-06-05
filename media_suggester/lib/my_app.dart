@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_suggester/theme/theme_provider.dart';
-import 'pages/pages/Login.dart';
+import 'pages/Login.dart';
 import 'package:provider/provider.dart';
 
 
