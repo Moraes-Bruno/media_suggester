@@ -28,8 +28,6 @@ class SuggestionRepository {
           Map<String, dynamic> respostaMapa = json.decode(resposta.body);
 
           var midias = respostaMapa['midias'];
-
-          //print('Mídias sugeridas: $midias');
           return midias as List<dynamic>;
         } else {
           // Requisição falhou
@@ -37,7 +35,7 @@ class SuggestionRepository {
           print(resposta.body);
         }
       } catch (erro) {
-// Tratar erros de requisição
+        // Tratar erros de requisição
         print('Erro ao fazer requisição POST: $erro');
       }
     }

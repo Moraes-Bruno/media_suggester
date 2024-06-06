@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/pages/genre_serie.dart';
 
-
 class Genre_movie extends StatefulWidget {
   @override
   _Genre_movieState createState() => _Genre_movieState();
@@ -34,8 +33,9 @@ class _Genre_movieState extends State<Genre_movie> {
   }
 
   Future<void> fetchGenres() async {
-    final apiKey = media.chaveApi ;
-    final url = 'https://api.themoviedb.org/3/genre/movie/list?api_key=$apiKey&language=pt-BR';
+    final apiKey = media.chaveApi;
+    final url =
+        'https://api.themoviedb.org/3/genre/movie/list?api_key=$apiKey&language=pt-BR';
 
     final response = await http.get(Uri.parse(url));
 
@@ -49,11 +49,13 @@ class _Genre_movieState extends State<Genre_movie> {
   }
 
   void saveSelectedGenres() {
-    List<dynamic> selectedGenres = genres.where((genre) => genre['selected'] ?? false).toList();
+    List<dynamic> selectedGenres =
+        genres.where((genre) => genre['selected'] ?? false).toList();
     print('Selected Genres: $selectedGenres');
     print(user?.uid);
 
-    List<Map<String, dynamic>> selectedGenresData = selectedGenres.take(5).map((genre) {
+    List<Map<String, dynamic>> selectedGenresData =
+        selectedGenres.take(5).map((genre) {
       return {
         'id': genre['id'],
         'name': genre['name'],
@@ -64,9 +66,9 @@ class _Genre_movieState extends State<Genre_movie> {
       'genders_movie': selectedGenresData,
     });
     Navigator.of(context).pop();
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Gender_serie()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => Gender_serie()));
   }
-
 
   void _showPopup() {
     showDialog(
@@ -74,13 +76,21 @@ class _Genre_movieState extends State<Genre_movie> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Aviso!!'),
-          content: Text('Você pode selecionar até cinco gêneros de filmes.  Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.', style: TextStyle(color: Colors.white,),),
+          content: Text(
+            'Você pode selecionar até cinco gêneros de filmes.  Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Fechar', style: TextStyle(color: Colors.white),),
+              child: Text(
+                'Fechar',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -106,7 +116,8 @@ class _Genre_movieState extends State<Genre_movie> {
               title: Text(genres[index]['name']),
               value: genres[index]['selected'] ?? false,
               checkColor: Colors.white,
-              activeColor: Theme.of(context).colorScheme.primary, // Definindo a cor da caixa de seleção como vermelho
+              activeColor: Theme.of(context).colorScheme.primary,
+              // Definindo a cor da caixa de seleção como vermelho
               onChanged: (value) {
                 setState(() {
                   if (value! && selectedCount >= 5) {

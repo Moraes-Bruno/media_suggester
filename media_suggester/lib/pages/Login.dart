@@ -181,12 +181,8 @@ class _LoginState extends State<Login> {
           .collection("preferences")
           .doc(userId)
           .get();
-      //.where("token_google", isEqualTo: "12345x")
-      // Se houver documentos encontrados, retorna true
-      print(user.exists);
       return user.exists;
     } catch (e) {
-      // Em caso de erro, retorna false
       return false;
     }
   }

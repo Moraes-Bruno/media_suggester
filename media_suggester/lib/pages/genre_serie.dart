@@ -73,7 +73,7 @@ class _Gender_serieState extends State<Gender_serie> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Aviso!!'),
-          content: Text('Você pode selecionar até cinco gêneros de Serie. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.', style: TextStyle(color: Colors.white,),),
+          content: Text('Você pode selecionar até cinco gêneros de séries. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.', style: TextStyle(color: Colors.white,),),
           actions: [
             TextButton(
               onPressed: () {
