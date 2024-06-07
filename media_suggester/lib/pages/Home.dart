@@ -18,7 +18,7 @@ import '../models/Midia.dart';
 class Home extends StatefulWidget {
   Home(this.user, {super.key});
 
-  User? user;
+  User user;
 
   @override
   State<Home> createState() => _HomeState(user);
@@ -28,17 +28,22 @@ class _HomeState extends State<Home> {
   final MediaRepository _mediaRepository = MediaRepository();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Widget? _body;
+  Image _carregandoImagem = Image(
+      image: AssetImage("assets/images/carregando-dados.png"),
+      height: 400,
+      width: 200);
+  String _carregandoTexto = "Carregando dados, por favor aguarde...";
 
   _HomeState(this.user);
 
-  User? user;
+  User user;
 
   @override
   void initState() {
     super.initState();
     //Verificando se usuário já tem preferências, para poder redirecionar
     // no caso de não ter e ter entrado direto na home por algum motivo
-    verificarPreferencia(user!.uid).then((value) {
+    verificarPreferencia(user.uid).then((value) {
       if (!value) {
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => Genre_movie()));
@@ -52,6 +57,14 @@ class _HomeState extends State<Home> {
       Suggestion sugestoes;
       verificarExisteRecomendacoes(user!.uid).then((value) async {
         if (!value) {
+          setState(() {
+            _carregandoImagem = Image(
+                image: AssetImage("assets/images/carregando-sugestoes.png"),
+                height: 500,
+                width: 400);
+            _carregandoTexto =
+                "Por favor aguarde enquanto geramos recomendações especiais para você...";
+          });
           //aqui eu trago do banco as preferencias
           DocumentSnapshot preferences = await FirebaseFirestore.instance
               .collection("preferences")
@@ -96,6 +109,10 @@ class _HomeState extends State<Home> {
               await verificarSeApiPossuiDadosDasSugestoesGeradas(
                   sugestoes_filmes, preferencias_filmes, "movie");
 
+          setState(() {
+            _carregandoTexto = "Quase lá...";
+          });
+
           List<Map<String, dynamic>> sugestoesFilmesFormatadasParaRegistro =
               await formatarParaFirestore(sugestoesFilmesValidadas);
           print(sugestoesFilmesFormatadasParaRegistro);
@@ -119,7 +136,7 @@ class _HomeState extends State<Home> {
         } else {
           DocumentSnapshot suggestionSnapshot = await FirebaseFirestore.instance
               .collection("suggestions")
-              .doc(user!.uid)
+              .doc(user.uid)
               .get();
 
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot);
@@ -428,7 +445,30 @@ class _HomeState extends State<Home> {
                 ],
               ),
               SizedBox(height: 16.0),
-              ...filmesWidgets,
+              filmesWidgets.isNotEmpty
+                  ? Column(children: filmesWidgets)
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Não encontramos nada...",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Image(
+                                image: AssetImage(
+                                    'assets/images/nenhum-dado-encontrado.png'),
+                                height: 300,
+                                width: 300)
+                          ],
+                        ),
+                      ],
+                    ),
+              //...filmesWidgets,
               SizedBox(height: 64.0),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -442,7 +482,31 @@ class _HomeState extends State<Home> {
                 ],
               ),
               SizedBox(height: 16.0),
-              ...seriesWidgets,
+              seriesWidgets.isNotEmpty
+                  ? Column(children: seriesWidgets)
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Não encontramos nada...",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Image(
+                                image: AssetImage(
+                                    'assets/images/nenhum-dado-encontrado.png'),
+                                height: 300,
+                                width: 300)
+                          ],
+                        ),
+                      ],
+                    ),
+              //...seriesWidgets,
+              SizedBox(height: 32.0),
             ],
           ),
         );
@@ -524,14 +588,22 @@ class _HomeState extends State<Home> {
         height: MediaQuery.of(context).size.height -
             kToolbarHeight -
             kBottomNavigationBarHeight,
-        child: _body == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                ],
-              )
-            : _body,
+        child: _body ??
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _carregandoImagem,
+                Text(
+                  _carregandoTexto,
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10, left: 25, right: 25),
+                  child: LinearProgressIndicator(minHeight: 15),
+                )
+              ],
+            ),
       ),
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
