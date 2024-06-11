@@ -182,13 +182,16 @@ class _ReviewsState extends State<Reviews> {
                                     width: 45,
                                   );
                                 default:
-                                  return Image(
-                                    image: NetworkImage(
-                                        (snapshot.data as DocumentSnapshot)
-                                            .get("photoUrl")),
-                                    height: 45,
-                                    width: 45,
-                                  );
+                                  return Container(
+                                      width: 45,
+                                      height: 45,
+                                      child: Image(
+                                        image: NetworkImage(
+                                            (snapshot.data as DocumentSnapshot)
+                                                .get("photoUrl")),
+                                        height: 45,
+                                        width: 45,
+                                      ));
                               }
                             }),
 
@@ -231,6 +234,7 @@ class _ReviewsState extends State<Reviews> {
                                       );
                                     default:
                                       return SizedBox(
+                                        width: 310,
                                         child: Text(
                                           (snapshot.data
                                               as Map<String, dynamic>)["title"],
@@ -238,7 +242,6 @@ class _ReviewsState extends State<Reviews> {
                                           maxLines: 1,
                                           softWrap: true,
                                         ),
-                                        width: 310,
                                       );
                                   }
                                 }),

@@ -2,9 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:media_suggester/pages/escrever_review.dart';
-import 'package:media_suggester/pages/favorito.dart';
 import 'package:media_suggester/pages/review_unica.dart';
 import 'package:media_suggester/repository/media_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -179,7 +177,7 @@ class _DetalhesState extends State<Detalhes> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const EscreverReview()));
+                                          EscreverReview(widget.media)));
                             },
                             style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
@@ -398,7 +396,7 @@ class _DetalhesState extends State<Detalhes> {
     //String mediaUri = Uri.encodeQueryComponent(nomeFilme);
     final Uri _url = Uri.parse('https://www.google.com/search?q=$nomeFilme');
 
-    print(_url);
+    //print(_url);
 
     if (!await launchUrl(_url)) {
       throw Exception('Could not launch $_url');
@@ -455,13 +453,16 @@ class _DetalhesState extends State<Detalhes> {
                                     width: 45,
                                   );
                                 default:
-                                  return Image(
-                                    image: NetworkImage(
-                                        (snapshot.data as DocumentSnapshot)
-                                            .get("photoUrl")),
-                                    height: 45,
-                                    width: 45,
-                                  );
+                                  return Container(
+                                      width: 45,
+                                      height: 45,
+                                      child: Image(
+                                        image: NetworkImage(
+                                            (snapshot.data as DocumentSnapshot)
+                                                .get("photoUrl")),
+                                        height: 45,
+                                        width: 45,
+                                      ));
                               }
                             }),
 
@@ -483,12 +484,17 @@ class _DetalhesState extends State<Detalhes> {
                                         width: 50,
                                       );
                                     default:
-                                      return Text(
-                                          (snapshot.data as DocumentSnapshot)
-                                              .get("name"),
-                                          style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold));
+                                      return SizedBox(
+                                          width: 230,
+                                          child: Text(
+                                            (snapshot.data as DocumentSnapshot)
+                                                .get("name"),
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold),
+                                            maxLines: 1,
+                                            softWrap: true,
+                                          ));
                                   }
                                 }),
                             Text(

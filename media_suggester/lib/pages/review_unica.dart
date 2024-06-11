@@ -26,7 +26,7 @@ class _ReviewUnicaState extends State<ReviewUnica> {
   void initState() {
     super.initState();
     _fetchGeneros();
-    print(widget.review['filmeId']);
+    //print(widget.review['filmeId']);
   }
 
   Future<void> _fetchGeneros() async {
@@ -97,13 +97,16 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image(
-                          image: NetworkImage(
-                              (snapshot.data as DocumentSnapshot)
-                                  .get("photoUrl")),
-                          height: 200,
-                          width: 200,
-                        ),
+                        Container(
+                            width: 200,
+                            height: 200,
+                            child: Image(
+                              image: NetworkImage(
+                                  (snapshot.data as DocumentSnapshot)
+                                      .get("photoUrl")),
+                              height: 200,
+                              width: 200,
+                            )),
                         const SizedBox(
                           height: 10,
                         ),
