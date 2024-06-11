@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:media_suggester/pages/CadastroPreferencias.dart';
+import 'package:media_suggester/views/CadastroPreferencias.dart';
 
 class Alterar extends StatelessWidget {
   const Alterar({super.key});

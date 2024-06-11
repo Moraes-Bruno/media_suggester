@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:media_suggester/pages/Detalhes.dart';
+import 'package:media_suggester/controller/media_controller.dart';
+import 'package:media_suggester/views/Detalhes.dart';
 import 'dart:convert';
-import 'package:media_suggester/pages/review_unica.dart';
-import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/views/review_unica.dart';
+import 'package:media_suggester/models/Media.dart';
 
 class Pesquisa extends StatefulWidget {
   const Pesquisa({super.key});
@@ -15,7 +16,7 @@ class Pesquisa extends StatefulWidget {
 
 class _PesquisaState extends State<Pesquisa> {
   List<dynamic> media = [];
-  MediaRepository mediaRepository = MediaRepository();
+  MediaController _mediaController = MediaController();
 
   @override
   void initState() {
@@ -24,7 +25,7 @@ class _PesquisaState extends State<Pesquisa> {
 
   Future<void> procurarMedia(String query) async {
     try {
-      final result = await mediaRepository.searchMedia(query);
+      final result = await _mediaController.searchMedia(query);
       setState(() {
         media = result
             .where((movie) =>

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/models/Media.dart';
 
 class ReviewUnica extends StatefulWidget {
   final dynamic review;
@@ -13,9 +13,9 @@ class ReviewUnica extends StatefulWidget {
 }
 
 class _ReviewUnicaState extends State<ReviewUnica> {
-  final MediaRepository _mediaRepository = MediaRepository();
+  final Media _media = Media();
   _carregarFilme(String filmeId) async {
-    Map<String, dynamic> filme = (await _mediaRepository.getMidia(
+    Map<String, dynamic> filme = (await _media.getMidia(
         filmeId, "movie"))[0] as Map<String, dynamic>;
     return filme;
   }
@@ -30,7 +30,7 @@ class _ReviewUnicaState extends State<ReviewUnica> {
   }
 
   Future<void> _fetchGeneros() async {
-    final genres = await _mediaRepository.fetchGeneros();
+    final genres = await _media.fetchGeneros();
     setState(() {
       _generos = genres;
     });

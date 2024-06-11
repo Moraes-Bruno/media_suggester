@@ -1,18 +1,18 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:media_suggester/pages/AlterarPerfil.dart';
-import 'package:media_suggester/pages/Detalhes.dart';
-import 'package:media_suggester/pages/favorito.dart';
+import 'package:media_suggester/views/AlterarPerfil.dart';
+import 'package:media_suggester/views/Detalhes.dart';
+import 'package:media_suggester/views/favorito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/models/Media.dart';
 
 class Perfil extends StatelessWidget {
   Perfil({super.key});
 
   final User? user = FirebaseAuth.instance.currentUser;
-  final MediaRepository mediaRepository = MediaRepository();
+  final Media _media = Media();
 
   /*Future<Map<String, dynamic>> _getUserData() async {
     if (user != null) {
@@ -42,7 +42,7 @@ class Perfil extends StatelessWidget {
 
       List<dynamic> mediaTemp = [];
       for (String favorito in favoritos) {
-        final result = await mediaRepository.searchMedia(favorito);
+        final result = await _media.searchMedia(favorito);
         final firstValidMedia = result
             .where((movie) =>
                 movie['title'] != null &&

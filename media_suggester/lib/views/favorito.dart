@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:media_suggester/pages/Detalhes.dart';
-import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/views/Detalhes.dart';
+import 'package:media_suggester/models/Media.dart';
 
 class Favorito extends StatefulWidget {
   @override
@@ -11,7 +11,7 @@ class Favorito extends StatefulWidget {
 }
 
 class _FavoritoState extends State<Favorito> {
-  MediaRepository mediaRepository = MediaRepository();
+  Media _media = Media();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -58,7 +58,7 @@ class _FavoritoState extends State<Favorito> {
 
       List<dynamic> mediaTemp = [];
       for (String favorito in favoritos) {
-        final result = await mediaRepository.searchMedia(favorito);
+        final result = await _media.searchMedia(favorito);
         final firstValidMedia = result
             .where((movie) =>
                 movie['title'] != null &&
@@ -87,7 +87,7 @@ class _FavoritoState extends State<Favorito> {
 
   Future<void> procurarMedia(String query) async {
     try {
-      final result = await mediaRepository.searchMedia(query);
+      final result = await _media.searchMedia(query);
       final firstValidMedia = result
           .where((movie) =>
               movie['title'] != null &&
