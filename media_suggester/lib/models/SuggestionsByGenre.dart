@@ -1,4 +1,4 @@
-import 'Midia.dart';
+import 'MediaSimplified.dart';
 
 class SugestoesPorGenero {
   int? idGenero;

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:media_suggester/controller/user_controller.dart';
 import 'package:media_suggester/views/Home.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/views/genre_movie.dart';
 
 class Login extends StatefulWidget {
@@ -15,26 +14,20 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  UserController _userController = UserController();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
-  User? userLogado;
 
   @override
   void initState() {
     super.initState();
-    _checkIfLoggedIn().then((loggedIn) {
+    _userController.CheckIfLoggedIn().then((loggedIn) {
       if (loggedIn) {
         // Se o usuário já está logado, redirecionar para a página Home
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => Home(_auth.currentUser!)));
       }
     });
-  }
-
-  Future<bool> _checkIfLoggedIn() async {
-    User? user = _auth.currentUser;
-    return user != null;
   }
 
   Future<void> _signInWithGoogle() async {
@@ -44,45 +37,20 @@ class _LoginState extends State<Login> {
       });
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      // O usuário cancelou o login.
       if (googleUser == null) {
-        // O usuário cancelou o login.
-        setState(() {
-          _isLoading = false; // Desativar indicador de progresso
-        });
+        setState(() => _isLoading = false);
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-      final User? user = userCredential.user;
+      final User? user = await _userController.SignIn(googleUser!);
 
       if (user != null) {
-        // Verificar se o documento do usuário existe no Firestore
-        final userDoc =
-            await _firestore.collection('users').doc(user.uid).get();
-
-        if (!userDoc.exists) {
-          // Se o documento não existir, criar um novo documento com as informações do usuário
-          await _firestore.collection('users').doc(user.uid).set({
-            'name': user.displayName,
-            'email': user.email,
-            'favoritos': [],
-            'nickname': user.displayName,
-            'photoUrl': user.photoURL,
-          });
-        }
-
         print('Usuário logado: ${user.displayName}');
-        verificarPreferencia(user.uid).then((value) {
-          value
+
+        _userController.HasPreferences(user.uid).then((hasPreferences) {
+          hasPreferences
               ? Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -95,7 +63,7 @@ class _LoginState extends State<Login> {
       print('Erro ao fazer login com Google: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Desativar indicador de progresso
+        _isLoading = false;
       });
     }
   }
@@ -145,7 +113,7 @@ class _LoginState extends State<Login> {
                           ),
                         ),
                         child: _isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
@@ -153,9 +121,9 @@ class _LoginState extends State<Login> {
                                   strokeWidth: 3,
                                 ),
                               )
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: const Text(
+                            : const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
                                   "Entrar",
                                   style: TextStyle(
                                       fontSize: 25,
@@ -173,17 +141,5 @@ class _LoginState extends State<Login> {
         ],
       ),
     );
-  }
-
-  static Future<bool> verificarPreferencia(String userId) async {
-    try {
-      DocumentSnapshot user = await FirebaseFirestore.instance
-          .collection("preferences")
-          .doc(userId)
-          .get();
-      return user.exists;
-    } catch (e) {
-      return false;
-    }
   }
 }
