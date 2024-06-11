@@ -7,6 +7,7 @@ import 'package:media_suggester/pages/favorito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/repository/media_repository.dart';
+import 'package:media_suggester/pages/Login.dart'; // Certifique-se de importar a página de login
 
 class Perfil extends StatelessWidget {
   Perfil({super.key});
@@ -14,18 +15,14 @@ class Perfil extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
   final MediaRepository mediaRepository = MediaRepository();
 
-  /*Future<Map<String, dynamic>> _getUserData() async {
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>;
-      }
+  Future<bool> signOutFromGoogle() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      return true;
+    } on Exception catch (_) {
+      return false;
     }
-    return {};
-  }*/
+  }
 
   Future<List<dynamic>> _fetchFavoritos(String userId) async {
     List<String> favoritos = [];
@@ -97,190 +94,228 @@ class Perfil extends StatelessWidget {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.data == null || !snapshot.data!.exists) {
-            return const CircularProgressIndicator(); // ou outro widget de aviso
-          }
-          var userData = snapshot.data!.data() as Map<String, dynamic>;
-          return SingleChildScrollView(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.only(top: 40, bottom: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image(
-                      image: userData['photoUrl'] != null
-                          ? NetworkImage(userData['photoUrl'])
-                          : const AssetImage(
-                                  'assets/images/profile_placeholder.png')
-                              as ImageProvider,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
+              .collection('users')
+              .doc(user?.uid)
+              .snapshots(),
+            builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!snapshot.hasData || snapshot.hasError) {
+              return const Center(child: Text("Erro ao carregar dados do usuário"));
+            }
+
+            var userData = snapshot.data!.data() as Map<String, dynamic>;
+            return SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.only(top: 40, bottom: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                      child: Image(
+                        image: userData['photoUrl'] != null
+                            ? NetworkImage(userData['photoUrl'])
+                            : const AssetImage(
+                                    'assets/images/profile_placeholder.png')
+                                as ImageProvider,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    color: const Color.fromARGB(255, 42, 42, 42),
-                    margin: const EdgeInsets.only(top: 40),
-                    child: SizedBox(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Center(
-                              child: Text(
-                                'INFORMAÇÕES',
-                                style: TextStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      color: const Color.fromARGB(255, 42, 42, 42),
+                      margin: const EdgeInsets.only(top: 40),
+                      child: SizedBox(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Center(
+                                child: Text(
+                                  'INFORMAÇÕES',
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              'Apelido: ${userData['nickname']}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Email: ${userData['email'] ?? 'Email não disponível'}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 16, bottom: 16),
-                    width: 250,
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Alterar(),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Apelido: ${userData['nickname'] ?? 'Apelido não disponível'}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                               const SizedBox(
+                                height: 10,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Email: ${userData['email'] ?? 'Email não disponível'}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                      ),
-                      child: Text(
-                        'ALTERAR DADOS',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color:
-                                Theme.of(context).colorScheme.inversePrimary),
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Favoritos',
-                          style: TextStyle(fontSize: 20),
+                    Container(
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
+                      width: 250,
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Alterar(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
+                        child: Text(
+                          'ALTERAR DADOS',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
+                      width: 250,
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          bool result = await signOutFromGoogle();
+                          if (result) {
+                            Navigator.pushAndRemoveUntil(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => Favorito(),
-                              ),
+                              MaterialPageRoute(builder: (context) => Login()), // Substitua com sua página de login
+                              (Route<dynamic> route) => false,
                             );
-                          },
-                          child: Text(
-                            'Ver mais',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary),
-                          ),
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
                         ),
-                      ],
+                        child: Text(
+                          'LOGOUT',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary),
+                        ),
+                      ),
                     ),
-                  ),
-                  FutureBuilder<List<dynamic>>(
-                    future: _fetchFavoritos(user!.uid),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return const Center(
-                            child: Text("Erro ao carregar favoritos"));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                            child: Text("Nenhum favorito encontrado"));
-                      } else {
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: CarouselSlider(
-                            items: snapshot.data!.map((item) {
-                              return Builder(
-                                builder: (BuildContext context) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      // Navigate to details page
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => Detalhes(item),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.all(5.0),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        child: Image.network(
-                                          'https://image.tmdb.org/t/p/w500${item['poster_path']}',
-                                          fit: BoxFit.cover,
-                                          width: 1000.0,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Favoritos',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Favorito(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Ver mais',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FutureBuilder<List<dynamic>>(
+                      future: _fetchFavoritos(user!.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return const Center(
+                              child: Text("Erro ao carregar favoritos"));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text("Nenhum favorito encontrado"));
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: CarouselSlider(
+                              items: snapshot.data!.map((item) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        // Navigate to details page
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                Detalhes(item),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.all(5.0),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            'https://image.tmdb.org/t/p/w500${item['poster_path']}',
+                                            fit: BoxFit.cover,
+                                            width: 1000.0,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }).toList(),
-                            options: CarouselOptions(
-                              aspectRatio: 16 / 9,
-                              viewportFraction: 1 / 3,
-                              enlargeCenterPage: false,
-                              enableInfiniteScroll: true,
-                              initialPage: 1,
-                              autoPlay: false,
+                                    );
+                                  },
+                                );
+                              }).toList(),
+                              options: CarouselOptions(
+                                aspectRatio: 16 / 9,
+                                viewportFraction: 1 / 3,
+                                enlargeCenterPage: false,
+                                enableInfiniteScroll: true,
+                                initialPage: 1,
+                                autoPlay: false,
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          }
+        ,),
     );
   }
 }
