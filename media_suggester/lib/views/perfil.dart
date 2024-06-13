@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:media_suggester/controller/user_controller.dart';
 import 'package:media_suggester/views/AlterarPerfil.dart';
 import 'package:media_suggester/views/Detalhes.dart';
 import 'package:media_suggester/views/favorito.dart';
@@ -12,56 +13,8 @@ class Perfil extends StatelessWidget {
   Perfil({super.key});
 
   final User? user = FirebaseAuth.instance.currentUser;
-  final Media _media = Media();
 
-  /*Future<Map<String, dynamic>> _getUserData() async {
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>;
-      }
-    }
-    return {};
-  }*/
-
-  Future<List<dynamic>> _fetchFavoritos(String userId) async {
-    List<String> favoritos = [];
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      if (userDoc.exists) {
-        var data = userDoc.data() as Map<String, dynamic>;
-        favoritos = List<String>.from(data['favoritos'] ?? []);
-      }
-
-      List<dynamic> mediaTemp = [];
-      for (String favorito in favoritos) {
-        final result = await _media.searchMedia(favorito);
-        final firstValidMedia = result
-            .where((movie) =>
-                movie['title'] != null &&
-                movie['overview'] != null &&
-                movie['poster_path'] != null)
-            .take(1)
-            .toList();
-
-        if (firstValidMedia.isNotEmpty) {
-          mediaTemp.add(firstValidMedia[0]);
-        }
-      }
-
-      return mediaTemp.take(6).toList();
-    } catch (e) {
-      print("Nao foi possivel retornar os favoritos: $e");
-      return [];
-    }
-  }
+  final UserController _userController = UserController();
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +172,7 @@ class Perfil extends StatelessWidget {
                     ),
                   ),
                   FutureBuilder<List<dynamic>>(
-                    future: _fetchFavoritos(user!.uid),
+                    future: _userController.GetFavoritos(user!.uid,true),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());

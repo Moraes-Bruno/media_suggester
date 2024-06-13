@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:media_suggester/controller/media_controller.dart';
 import 'package:media_suggester/views/escrever_review.dart';
 import 'package:media_suggester/views/favorito.dart';
 import 'package:media_suggester/views/review_unica.dart';
@@ -22,7 +23,7 @@ class Detalhes extends StatefulWidget {
 class _DetalhesState extends State<Detalhes> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Media _media = Media();
+  final MediaController _mediaController = MediaController();
   late Future<QuerySnapshot<Map<String, dynamic>>> listReviews;
 
   Map<int, String> _generos = {};
@@ -46,7 +47,7 @@ class _DetalhesState extends State<Detalhes> {
   Future<void> _fetchGeneros() async {
     final firstAirDate = widget.media['first_air_date'];
     final genres =
-        await _media.fetchGeneros(firstAirDate: firstAirDate);
+        await _mediaController.fetchGeneros(firstAirDate: firstAirDate);
     setState(() {
       _generos = genres;
     });

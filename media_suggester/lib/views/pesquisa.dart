@@ -16,7 +16,7 @@ class Pesquisa extends StatefulWidget {
 
 class _PesquisaState extends State<Pesquisa> {
   List<dynamic> media = [];
-  MediaController _mediaController = MediaController();
+  final MediaController _mediaController = MediaController();
 
   @override
   void initState() {
@@ -27,12 +27,7 @@ class _PesquisaState extends State<Pesquisa> {
     try {
       final result = await _mediaController.searchMedia(query);
       setState(() {
-        media = result
-            .where((movie) =>
-                (movie['title'] != null || movie['original_name'] != null) &&
-                movie['overview'] != null &&
-                movie['poster_path'] != null)
-            .toList();
+        media = result;
       });
     } catch (error) {
       // Lidar com erros
@@ -111,7 +106,7 @@ class _PesquisaState extends State<Pesquisa> {
                       );
                     },
                   )
-                : Column(
+                : const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image(

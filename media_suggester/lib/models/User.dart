@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:media_suggester/models/Media.dart';
+import 'package:flutter/material.dart';
+
 
 class UserModel {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? userLogado;
+
 
   Future<User?> SignIn(googleUser) async {
     final GoogleSignInAuthentication googleAuth =
@@ -72,4 +76,48 @@ class UserModel {
       return false;
     }
   }
+
+  Future<List<dynamic>> FetchFavoritos(String userId,bool limit) async {
+    final Media media = Media();
+    List<String> favoritos = [];
+
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        var data = userDoc.data() as Map<String, dynamic>;
+        favoritos = List<String>.from(data['favoritos'] ?? []);
+      }
+
+      List<dynamic> mediaTemp = [];
+      for (String favorito in favoritos) {
+        final result = await media.searchMedia(favorito);
+        final firstValidMedia = result
+            .where((movie) =>
+                movie['title'] != null &&
+                movie['overview'] != null &&
+                movie['poster_path'] != null)
+            .take(1)
+            .toList();
+
+        if (firstValidMedia.isNotEmpty) {
+          mediaTemp.add(firstValidMedia[0]);
+        }
+      }
+
+      if(limit){
+       mediaTemp = mediaTemp.take(6).toList();
+      }
+
+      return mediaTemp;
+
+    } catch (e) {
+      print("Nao foi possivel retornar os favoritos: $e");
+      return [];
+    }
+  }
+
 }

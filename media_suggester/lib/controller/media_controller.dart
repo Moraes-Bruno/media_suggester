@@ -4,9 +4,16 @@ import 'package:media_suggester/models/Media.dart';
 class MediaController extends PageController {
   final Media _media = Media();
 
-  dynamic searchMedia(String pesquisa) {
-    return _media.searchMedia(pesquisa);
+   Future<List<dynamic>> searchMedia(String pesquisa) async {
+    final result = await _media.searchMedia(pesquisa);
+    return result
+        .where((media) =>
+            (media['title'] != null || media['original_name'] != null) &&
+            media['overview'] != null &&
+            media['poster_path'] != null)
+        .toList();
   }
+
 
   Future<List<dynamic>> getMediaGenre(int generoId, String tipoMedia) async {
     return _media.getMediaGenre(generoId, tipoMedia);
@@ -19,4 +26,6 @@ class MediaController extends PageController {
   Future<Map<int, String>> fetchGeneros({String? firstAirDate}) async {
     return _media.fetchGeneros(firstAirDate: firstAirDate);
   }
+
+  
 }

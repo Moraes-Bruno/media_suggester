@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Media {
-  String chaveApi = "chave_api";
+  String chaveApi = "";
 
   final String urlBase = 'https://api.themoviedb.org/3';
 
@@ -76,4 +76,5 @@ class Media {
       throw Exception('Failed to load genres');
     }
   }
+
 }

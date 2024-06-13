@@ -25,4 +25,9 @@ class UserController extends PageController {
   Future<DocumentSnapshot?> GetPreferences(userId) async {
     return _user.GetPreferences(userId);
   }
+
+  Future<List<dynamic>> GetFavoritos(userId,limit){
+    return _user.FetchFavoritos(userId,limit);
+  }
+
 }
