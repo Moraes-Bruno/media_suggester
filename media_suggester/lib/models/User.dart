@@ -119,5 +119,43 @@ class UserModel {
       return [];
     }
   }
+  //----------------------------Gener Movie -------------------------------
+  Future<void> saveSelectedGenres_movie(List<dynamic> genres) async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Usuário não autenticado');
+    }
 
+    List<dynamic> selectedGenres = genres.where((genre) => genre['selected'] ?? false).toList();
+    List<Map<String, dynamic>> selectedGenresData = selectedGenres.take(5).map((genre) {
+      return {
+        'id': genre['id'],
+        'name': genre['name'],
+      };
+    }).toList();
+
+    await _firestore.collection('preferences').doc(user.uid).set({
+      'genders_movie': selectedGenresData,
+    });
+  }
+
+  //------------------------------serie----------------------------
+  Future<void> saveSelectedGenres_serie(List<dynamic> genres) async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Usuário não autenticado');
+    }
+
+    List<dynamic> selectedGenres = genres.where((genre) => genre['selected'] ?? false).toList();
+    List<Map<String, dynamic>> selectedGenresData = selectedGenres.take(5).map((genre) {
+      return {
+        'id': genre['id'],
+        'name': genre['name'],
+      };
+    }).toList();
+
+    await _firestore.collection('preferences').doc(user.uid).update({
+      'genders_serie': selectedGenresData,
+    });
+  }
 }

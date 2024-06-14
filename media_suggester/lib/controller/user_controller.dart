@@ -29,5 +29,12 @@ class UserController extends PageController {
   Future<List<dynamic>> GetFavoritos(userId,limit){
     return _user.FetchFavoritos(userId,limit);
   }
-
+ //-------------------genre_movie------------------------
+  Future<void> saveSelectedGenres_movie(List<dynamic> genres) async {
+    await _user.saveSelectedGenres_movie(genres);
+  }
+  //-------------genre_seria----------------------------
+  Future<void> saveSelectedGenres_serie(List<dynamic> genres) async {
+    await _user.saveSelectedGenres_serie(genres);
+  }
 }

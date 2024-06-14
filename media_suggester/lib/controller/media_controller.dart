@@ -26,6 +26,10 @@ class MediaController extends PageController {
   Future<Map<int, String>> fetchGeneros({String? firstAirDate}) async {
     return _media.fetchGeneros(firstAirDate: firstAirDate);
   }
-
-  
+  Future <List<dynamic>> fetchGenres_movie() async{
+     return _media.fetchGenres_movie();
+  }
+  Future <List<dynamic>> fetchGenres_serie() async{
+    return _media.fetchGenres_serie();
+  }
 }
