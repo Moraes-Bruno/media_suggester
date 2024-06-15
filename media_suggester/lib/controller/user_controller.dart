@@ -30,4 +30,8 @@ class UserController extends PageController {
     return _user.FetchFavoritos(userId,limit);
   }
 
+  Future <bool> Favoritar(String nomeMedia,String uid){
+    return _user.Favoritar(nomeMedia,uid);
+  }
+
 }

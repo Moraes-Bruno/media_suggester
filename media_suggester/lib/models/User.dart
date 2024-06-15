@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/models/Media.dart';
 import 'package:flutter/material.dart';
 
-
 class UserModel {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -41,7 +40,7 @@ class UserModel {
     return user;
   }
 
-  Future<DocumentSnapshot?> GetPreferences(userId) async{
+  Future<DocumentSnapshot?> GetPreferences(userId) async {
     DocumentSnapshot preferences = await FirebaseFirestore.instance
         .collection("preferences")
         .doc(userId)
@@ -77,7 +76,7 @@ class UserModel {
     }
   }
 
-  Future<List<dynamic>> FetchFavoritos(String userId,bool limit) async {
+  Future<List<dynamic>> FetchFavoritos(String userId, bool limit) async {
     final Media media = Media();
     List<String> favoritos = [];
 
@@ -108,16 +107,49 @@ class UserModel {
         }
       }
 
-      if(limit){
-       mediaTemp = mediaTemp.take(6).toList();
+      if (limit) {
+        mediaTemp = mediaTemp.take(6).toList();
       }
 
       return mediaTemp;
-
     } catch (e) {
       print("Nao foi possivel retornar os favoritos: $e");
       return [];
     }
   }
 
+  //-------------------Detalhes.dart-----------------------\\
+  Future <bool> Favoritar(String nomeMedia,String uid) async {
+    bool add = false;
+
+    try {
+      DocumentReference userDoc =
+          _firestore.collection('users').doc(uid);
+      
+      print(userLogado?.displayName);
+
+      DocumentSnapshot userSnapshot = await userDoc.get();
+
+      List favoritos = userSnapshot['favoritos'] ?? [];
+
+      if (favoritos.contains(nomeMedia)) {
+        await userDoc.update({
+          'favoritos': FieldValue.arrayRemove([nomeMedia])
+        });
+
+        add = false;
+      }else {
+          await userDoc.update({
+            'favoritos': FieldValue.arrayUnion([nomeMedia])
+          });
+          add = true;
+          }
+
+         
+    } catch (e) {
+      print(e);
+    }
+
+    return add;
+  }
 }

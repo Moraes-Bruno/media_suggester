@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Media {
-  String chaveApi = "";
+  String chaveApi = "68df955e186472a00f82954f57d23073";
 
   final String urlBase = 'https://api.themoviedb.org/3';
 
