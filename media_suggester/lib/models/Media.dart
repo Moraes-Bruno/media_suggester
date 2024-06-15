@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Media {
-  String chaveApi = "68df955e186472a00f82954f57d23073";
+  String chaveApi = "";
 
   final String urlBase = 'https://api.themoviedb.org/3';
 
@@ -98,5 +99,15 @@ class Media {
     } else {
       throw Exception('Failed to load genres');
     }
+  }
+
+  //---------------Detalhes.dart-------------------//
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchReviews(int mediaId) {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    return firestore
+        .collection('reviews')
+        .limit(10)
+        .where('filmeId', isEqualTo: mediaId.toString())
+        .get();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_suggester/models/Media.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MediaController extends PageController {
   final Media _media = Media();
@@ -26,6 +27,10 @@ class MediaController extends PageController {
   //-------------------detalhes.dart--------------------\\
   Future<Map<int, String>> fetchGeneros({String? firstAirDate}) async {
     return _media.fetchGeneros(firstAirDate: firstAirDate);
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchReviews(int mediaId){
+    return _media.fetchReviews(mediaId);
   }
 
   //-----Relativo as preferencias do usuario-----\\

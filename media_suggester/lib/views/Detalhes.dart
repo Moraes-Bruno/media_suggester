@@ -38,11 +38,7 @@ class _DetalhesState extends State<Detalhes> {
     super.initState();
     _fetchGeneros();
     user = _auth.currentUser;
-    listReviews = _firestore
-        .collection('reviews')
-        .limit(10)
-        .where('filmeId', isEqualTo: widget.media["id"].toString())
-        .get();
+    listReviews = _mediaController.fetchReviews(widget.media['id']);
   }
 
   Future<void> _fetchGeneros() async {
