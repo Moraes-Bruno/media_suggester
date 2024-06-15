@@ -5,69 +5,52 @@ import 'package:media_suggester/models/Media.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/views/genre_serie.dart';
+import 'package:media_suggester/controller/user_controller.dart';
+import 'package:media_suggester/controller/media_controller.dart';
 
 class Genre_movie extends StatefulWidget {
   @override
-  _Genre_movieState createState() => _Genre_movieState();
+  _GenreMovieState createState() => _GenreMovieState();
 }
 
-class _Genre_movieState extends State<Genre_movie> {
+class _GenreMovieState extends State<Genre_movie> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final MediaController _mediaController = MediaController();
+  final UserController _userController = UserController();
 
   List<dynamic> genres = [];
   int selectedCount = 0;
-  Media _media = Media();
 
   User? user;
 
   @override
   void initState() {
-    user = _auth.currentUser;
-
     super.initState();
-    fetchGenres();
+    user = _auth.currentUser;
+    _loadGenres();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showPopup();
     });
   }
 
-  Future<void> fetchGenres() async {
-    final apiKey = _media.chaveApi;
-    final url =
-        'https://api.themoviedb.org/3/genre/movie/list?api_key=$apiKey&language=pt-BR';
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        genres = json.decode(response.body)['genres'];
-      });
-    } else {
-      throw Exception('Failed to load genres');
-    }
+  Future<void> _loadGenres() async {
+    List<dynamic> fetchedGenres = await _mediaController.fetchGenres_movie();
+    setState(() {
+      genres = fetchedGenres;
+    });
   }
 
-  void saveSelectedGenres() {
-    List<dynamic> selectedGenres =
-        genres.where((genre) => genre['selected'] ?? false).toList();
-    print('Selected Genres: $selectedGenres');
-    print(user?.uid);
-
-    List<Map<String, dynamic>> selectedGenresData =
-        selectedGenres.take(5).map((genre) {
-      return {
-        'id': genre['id'],
-        'name': genre['name'],
-      };
-    }).toList();
-
-    _firestore.collection('preferences').doc(user?.uid).set({
-      'genders_movie': selectedGenresData,
-    });
-    Navigator.of(context).pop();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Gender_serie()));
+  void _saveSelectedGenres() async {
+    try {
+      await _userController.saveSelectedGenres_movie(genres);
+      Navigator.of(context).pop();
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Gender_serie()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao salvar gêneros: $e')));
+    }
   }
 
   void _showPopup() {
@@ -77,7 +60,7 @@ class _Genre_movieState extends State<Genre_movie> {
         return AlertDialog(
           title: Text('Aviso!!'),
           content: Text(
-            'Você pode selecionar até cinco gêneros de filmes.  Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.',
+            'Você pode selecionar até cinco gêneros de filmes. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.',
             style: TextStyle(
               color: Colors.white,
             ),
@@ -117,7 +100,6 @@ class _Genre_movieState extends State<Genre_movie> {
               value: genres[index]['selected'] ?? false,
               checkColor: Colors.white,
               activeColor: Theme.of(context).colorScheme.primary,
-              // Definindo a cor da caixa de seleção como vermelho
               onChanged: (value) {
                 setState(() {
                   if (value! && selectedCount >= 5) {
@@ -138,7 +120,7 @@ class _Genre_movieState extends State<Genre_movie> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        onPressed: saveSelectedGenres,
+        onPressed: _saveSelectedGenres,
         child: Icon(Icons.save, color: Colors.white),
       ),
     );

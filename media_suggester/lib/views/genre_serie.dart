@@ -5,16 +5,18 @@ import 'package:media_suggester/models/Media.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/views/Home.dart';
-
+import 'package:media_suggester/controller/user_controller.dart';
+import 'package:media_suggester/controller/media_controller.dart';
 
 class Gender_serie extends StatefulWidget {
   @override
-  _Gender_serieState createState() => _Gender_serieState();
+  _GenderSerieState createState() => _GenderSerieState();
 }
 
-class _Gender_serieState extends State<Gender_serie> {
+class _GenderSerieState extends State<Gender_serie> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final MediaController _mediaController = MediaController();
+  final UserController _userController = UserController();
 
   List<dynamic> genres = [];
   int selectedCount = 0;
@@ -24,48 +26,29 @@ class _Gender_serieState extends State<Gender_serie> {
 
   @override
   void initState() {
-    user = _auth.currentUser;
-
     super.initState();
-    fetchGenres();
+    user = _auth.currentUser;
+    _loadGenres();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showPopup();
     });
   }
 
-  Future<void> fetchGenres() async {
-    final apiKey = _media.chaveApi ;
-    final url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=$apiKey&language=pt-BR';
+  Future<void> _loadGenres() async {
+    List<dynamic> fetchedGenres = await _mediaController.fetchGenres_serie();
+    setState(() {
+      genres = fetchedGenres;
+    });
+  }
 
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        genres = json.decode(response.body)['genres'];
-      });
-    } else {
-      throw Exception('Failed to load genres');
+  void _saveSelectedGenres() async {
+    try {
+      await _userController.saveSelectedGenres_serie(genres);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(user!)));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao salvar gêneros: $e')));
     }
   }
-
-  void saveSelectedGenres() {
-    List<dynamic> selectedGenres = genres.where((genre) => genre['selected'] ?? false).toList();
-    print('Selected Genres: $selectedGenres');
-    print(user?.uid);
-
-    List<Map<String, dynamic>> selectedGenresData = selectedGenres.take(5).map((genre) {
-      return {
-        'id': genre['id'],
-        'name': genre['name'],
-      };
-    }).toList();
-
-    _firestore.collection('preferences').doc(user?.uid).update({
-      'genders_serie': selectedGenresData,
-    });
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Home(user!)));
-  }
-
 
   void _showPopup() {
     showDialog(
@@ -73,13 +56,16 @@ class _Gender_serieState extends State<Gender_serie> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Aviso!!'),
-          content: Text('Você pode selecionar até cinco gêneros de séries. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.', style: TextStyle(color: Colors.white,),),
+          content: Text(
+            'Você pode selecionar até cinco gêneros de séries. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.',
+            style: TextStyle(color: Colors.white),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Fechar', style: TextStyle(color: Colors.white),),
+              child: Text('Fechar', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -92,7 +78,7 @@ class _Gender_serieState extends State<Gender_serie> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Gêneros de serie',
+          'Gêneros de série',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -105,7 +91,7 @@ class _Gender_serieState extends State<Gender_serie> {
               title: Text(genres[index]['name']),
               value: genres[index]['selected'] ?? false,
               checkColor: Colors.white,
-              activeColor: Theme.of(context).colorScheme.primary, // Definindo a cor da caixa de seleção como vermelho
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 setState(() {
                   if (value! && selectedCount >= 5) {
@@ -126,7 +112,7 @@ class _Gender_serieState extends State<Gender_serie> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        onPressed: saveSelectedGenres,
+        onPressed: _saveSelectedGenres,
         child: Icon(Icons.save, color: Colors.white),
       ),
     );

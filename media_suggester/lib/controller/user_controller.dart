@@ -30,8 +30,17 @@ class UserController extends PageController {
     return _user.FetchFavoritos(userId,limit);
   }
 
+  //-------------------detalhes.dart------------------\\
   Future <bool> Favoritar(String nomeMedia,String uid){
     return _user.Favoritar(nomeMedia,uid);
   }
 
+ //-------------------genre_movie------------------------
+  Future<void> saveSelectedGenres_movie(List<dynamic> genres) async {
+    await _user.saveSelectedGenres_movie(genres);
+  }
+  //-------------genre_seria----------------------------
+  Future<void> saveSelectedGenres_serie(List<dynamic> genres) async {
+    await _user.saveSelectedGenres_serie(genres);
+  }
 }

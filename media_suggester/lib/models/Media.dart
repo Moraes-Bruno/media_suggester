@@ -76,5 +76,27 @@ class Media {
       throw Exception('Failed to load genres');
     }
   }
+  //-----------------------Movie---------------------------------
+  Future <List<dynamic>>  fetchGenres_movie() async {
+    final url =
+        'https://api.themoviedb.org/3/genre/movie/list?api_key=$chaveApi&language=pt-BR';
 
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['genres'];
+    } else {
+      throw Exception('Failed to load genres');
+    }
+  }
+  //---------------------serie-----------------------------------
+  Future<List<dynamic>> fetchGenres_serie() async {
+    final url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=$chaveApi&language=pt-BR';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['genres'];
+    } else {
+      throw Exception('Failed to load genres');
+    }
+  }
 }

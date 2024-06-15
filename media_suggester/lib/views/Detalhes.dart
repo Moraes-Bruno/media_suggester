@@ -29,16 +29,14 @@ class _DetalhesState extends State<Detalhes> {
   late Future<QuerySnapshot<Map<String, dynamic>>> listReviews;
 
   Map<int, String> _generos = {};
-  late Future <bool> isAdded;
+  late Future<bool> isAdded;
 
   User? user;
-  bool _isFavorited = false;
 
   @override
   void initState() {
     super.initState();
     _fetchGeneros();
-    _favoritado();
     user = _auth.currentUser;
     listReviews = _firestore
         .collection('reviews')
@@ -56,43 +54,31 @@ class _DetalhesState extends State<Detalhes> {
     });
   }
 
-  Future<void> _favoritado() async {
-    if (user != null) {
-      try {
-        DocumentReference userDoc =
-            _firestore.collection('users').doc(user?.uid);
-        DocumentSnapshot userSnapshot = await userDoc.get();
-        List favoritos = userSnapshot['favoritos'] ?? [];
-        setState(() {
-          _isFavorited = favoritos
-              .contains(widget.media['title'] ?? widget.media['original_name']);
-        });
-      } catch (e) {
-        print(e);
-      }
+  void mostrarMensagem(isAdded, BuildContext context) {
+    if (isAdded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso.",
+            style: const TextStyle(fontSize: 17),
+          ),
+
+          duration: const Duration(seconds: 2), // Define a duração do SnackBar
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso.",
+            style: const TextStyle(fontSize: 17),
+          ),
+
+          duration: const Duration(seconds: 2), // Define a duração do SnackBar
+        ),
+      );
     }
   }
-
-  void mostrarMensagem( isAdded,BuildContext context) {
-  if(isAdded){
-    ScaffoldMessenger.of(context).showSnackBar(
-     SnackBar(
-      content: Text("${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso."),
-
-      duration: const Duration(seconds: 2), // Define a duração do SnackBar
-    ),
-  );
-  }else{
-     ScaffoldMessenger.of(context).showSnackBar(
-     SnackBar(
-      content: Text("${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso."),
-
-      duration: const Duration(seconds: 2), // Define a duração do SnackBar
-    ),);
-  }
-  
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -144,14 +130,14 @@ class _DetalhesState extends State<Detalhes> {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              
-                               isAdded = _userController.Favoritar(widget.media['title'] ??
-                                  widget.media['original_name'] ??
-                                  '',user!.uid) ;
-                                bool adicionado = await isAdded;
-                                
-                                mostrarMensagem(adicionado,context);
+                              isAdded = _userController.Favoritar(
+                                  widget.media['title'] ??
+                                      widget.media['original_name'] ??
+                                      '',
+                                  user!.uid);
+                              bool adicionado = await isAdded;
 
+                              mostrarMensagem(adicionado, context);
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -159,9 +145,7 @@ class _DetalhesState extends State<Detalhes> {
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
-                              _isFavorited
-                                  ? Icons.favorite
-                                  : Icons.favorite_border_outlined,
+                              Icons.favorite_border_outlined,
                               color:
                                   Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
