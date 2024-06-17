@@ -6,6 +6,7 @@ import 'package:media_suggester/views/Detalhes.dart';
 import 'dart:convert';
 import 'package:media_suggester/views/review_unica.dart';
 import 'package:media_suggester/models/Media.dart';
+import 'package:media_suggester/widgets/searchWidget.dart';
 
 class Pesquisa extends StatefulWidget {
   const Pesquisa({super.key});
@@ -16,7 +17,7 @@ class Pesquisa extends StatefulWidget {
 
 class _PesquisaState extends State<Pesquisa> {
   List<dynamic> media = [];
-  MediaController _mediaController = MediaController();
+  final MediaController _mediaController = MediaController();
 
   @override
   void initState() {
@@ -27,12 +28,7 @@ class _PesquisaState extends State<Pesquisa> {
     try {
       final result = await _mediaController.searchMedia(query);
       setState(() {
-        media = result
-            .where((movie) =>
-                (movie['title'] != null || movie['original_name'] != null) &&
-                movie['overview'] != null &&
-                movie['poster_path'] != null)
-            .toList();
+        media = result;
       });
     } catch (error) {
       // Lidar com erros
@@ -77,41 +73,9 @@ class _PesquisaState extends State<Pesquisa> {
             ),
           ),
           Expanded(
-            child: media.length > 0
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: media.length,
-                    itemBuilder: (context, index) {
-                      final movie = media[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Detalhes(movie),
-                            ),
-                          );
-                        },
-                        child: ListTile(
-                          title: Text(
-                            movie['title'] ?? movie['original_name'],
-                            maxLines: 2,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            movie['overview'],
-                            maxLines: 3,
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                          leading: Image.network(
-                            'https://image.tmdb.org/t/p/w200/${movie['poster_path']}',
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : Column(
+            child: media.isNotEmpty
+                ? Searchcardwidget(media: media)
+                : const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image(

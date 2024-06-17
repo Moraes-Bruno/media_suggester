@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:media_suggester/controller/media_controller.dart';
+import 'package:media_suggester/controller/user_controller.dart';
 import 'package:media_suggester/views/escrever_review.dart';
 import 'package:media_suggester/views/favorito.dart';
 import 'package:media_suggester/views/review_unica.dart';
@@ -22,86 +24,55 @@ class Detalhes extends StatefulWidget {
 class _DetalhesState extends State<Detalhes> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Media _media = Media();
+  final MediaController _mediaController = MediaController();
+  final UserController _userController = UserController();
   late Future<QuerySnapshot<Map<String, dynamic>>> listReviews;
 
   Map<int, String> _generos = {};
+  late Future<bool> isAdded;
 
   User? user;
-  bool _isFavorited = false;
 
   @override
   void initState() {
     super.initState();
     _fetchGeneros();
-    _favoritado();
     user = _auth.currentUser;
-    listReviews = _firestore
-        .collection('reviews')
-        .limit(10)
-        .where('filmeId', isEqualTo: widget.media["id"].toString())
-        .get();
+    listReviews = _mediaController.fetchReviews(widget.media['id']);
   }
 
   Future<void> _fetchGeneros() async {
     final firstAirDate = widget.media['first_air_date'];
     final genres =
-        await _media.fetchGeneros(firstAirDate: firstAirDate);
+        await _mediaController.fetchGeneros(firstAirDate: firstAirDate);
     setState(() {
       _generos = genres;
     });
   }
 
-  Future<void> _favoritado() async {
-    if (user != null) {
-      try {
-        DocumentReference userDoc =
-            _firestore.collection('users').doc(user?.uid);
-        DocumentSnapshot userSnapshot = await userDoc.get();
-        List favoritos = userSnapshot['favoritos'] ?? [];
-        setState(() {
-          _isFavorited = favoritos
-              .contains(widget.media['title'] ?? widget.media['original_name']);
-        });
-      } catch (e) {
-        print(e);
-      }
-    }
-  }
+  void mostrarMensagem(isAdded, BuildContext context) {
+    if (isAdded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso.",
+            style: const TextStyle(fontSize: 17),
+          ),
 
-  Future<void> _favoritar(String nomeMedia) async {
-    if (user != null) {
-      try {
-        DocumentReference userDoc =
-            _firestore.collection('users').doc(user?.uid);
-
-        DocumentSnapshot userSnapshot = await userDoc.get();
-
-        List favoritos = userSnapshot['favoritos'] ?? [];
-
-        if (favoritos.contains(nomeMedia)) {
-          await userDoc.update({
-            'favoritos': FieldValue.arrayRemove([nomeMedia])
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  '${widget.media['title'] ?? widget.media['original_name']} Removido dos favoritos')));
-        } else {
-          await userDoc.update({
-            'favoritos': FieldValue.arrayUnion([nomeMedia])
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  '${widget.media['title'] ?? widget.media['original_name']} adicionado aos favoritos')));
-        }
-      } catch (e) {
-        print(e);
-      }
+          duration: const Duration(seconds: 2), // Define a duração do SnackBar
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário não autenticado!')));
+        SnackBar(
+          content: Text(
+            "${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso.",
+            style: const TextStyle(fontSize: 17),
+          ),
+
+          duration: const Duration(seconds: 2), // Define a duração do SnackBar
+        ),
+      );
     }
   }
 
@@ -154,10 +125,15 @@ class _DetalhesState extends State<Detalhes> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           ElevatedButton(
-                            onPressed: () {
-                              _favoritar(widget.media['title'] ??
-                                  widget.media['original_name'] ??
-                                  '');
+                            onPressed: () async {
+                              isAdded = _userController.Favoritar(
+                                  widget.media['title'] ??
+                                      widget.media['original_name'] ??
+                                      '',
+                                  user!.uid);
+                              bool adicionado = await isAdded;
+
+                              mostrarMensagem(adicionado, context);
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -165,9 +141,7 @@ class _DetalhesState extends State<Detalhes> {
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
-                              _isFavorited
-                                  ? Icons.favorite
-                                  : Icons.favorite_border_outlined,
+                              Icons.favorite_border_outlined,
                               color:
                                   Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
