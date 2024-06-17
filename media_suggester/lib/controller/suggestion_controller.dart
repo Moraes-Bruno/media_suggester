@@ -15,8 +15,8 @@ class SuggestionController extends PageController {
     return _suggestion.GetSuggestions(userId);
   }
 
-  Future<DocumentSnapshot?> SetSuggestions(userId, filmes, series) async {
-    return _suggestion.SetSuggestions(userId, filmes, series);
+  Future<void> SetSuggestions(userId, filmes, series) async {
+    _suggestion.SetSuggestions(userId, filmes, series);
   }
 
   Future<List<SugestoesPorGenero>?>
@@ -35,6 +35,6 @@ class SuggestionController extends PageController {
 
   Future<Widget?> CarregarSugestoes(
       Suggestion? sugestoes, BuildContext context) async {
-    _suggestion.CarregarSugestoes(sugestoes, context);
+    return _suggestion.CarregarSugestoes(sugestoes, context);
   }
 }

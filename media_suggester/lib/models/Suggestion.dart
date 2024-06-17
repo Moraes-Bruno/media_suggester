@@ -25,18 +25,17 @@ class Suggestion {
 
   factory Suggestion.fromGeneratedInput(
       List<dynamic> filmes, List<dynamic> series) {
-    return Suggestion(
-      filmes,
-      series
-    );
+    return Suggestion(filmes, series);
   }
-  Future<DocumentSnapshot?> GetSuggestions(userId) async{
-    FirebaseFirestore.instance
+
+  Future<DocumentSnapshot?> GetSuggestions(userId) async {
+    return FirebaseFirestore.instance
         .collection("suggestions")
         .doc(userId)
         .get();
   }
-  Future<DocumentSnapshot?> SetSuggestions(userId, filmes, series) async{
+
+  Future<void> SetSuggestions(userId, filmes, series) async {
     FirebaseFirestore.instance.collection('suggestions').doc(userId).set({
       'filmes': filmes,
       'series': series,
@@ -68,30 +67,29 @@ class Suggestion {
           Map<String, dynamic> respostaMapa = json.decode(resposta.body);
 
           var midias = respostaMapa['midias'];
+
           return midias as List<dynamic>;
         } else {
-          // Requisição falhou
           print('Erro na requisição POST: ${resposta.statusCode}');
           print(resposta.body);
         }
       } catch (erro) {
-        // Tratar erros de requisição
         print('Erro ao fazer requisição POST: $erro');
       }
     }
   }
 
   Future<List<SugestoesPorGenero>?>
-  verificarSeApiPossuiDadosDasSugestoesGeradas(
-      List<dynamic> sugestoesGeradas,
-      List<Map<String, dynamic>> preferencias,
-      String tipoMidia) async {
+      verificarSeApiPossuiDadosDasSugestoesGeradas(
+          List<dynamic> sugestoesGeradas,
+          List<Map<String, dynamic>> preferencias,
+          String tipoMidia) async {
     Media _media = Media();
     List<SugestoesPorGenero>? sugestoesPorGeneroValidadas = [];
     final List<int?> midiasAdicionadas = [];
     try {
       List<SugestoesPorGenero> sugestoesPorGenero =
-      SugestoesPorGenero.fromJsonList(sugestoesGeradas);
+          SugestoesPorGenero.fromJsonList(sugestoesGeradas);
 
       for (SugestoesPorGenero listaSugestoes in sugestoesPorGenero) {
         List<Midia> midiasDoGenero = [];
@@ -99,11 +97,11 @@ class Suggestion {
           var midias = await _media.searchMedia(midia.titulo!);
           if (midias.isNotEmpty) {
             var m = midias.firstWhere(
-                    (m) =>
-                (m['title'] == midia.titulo ||
-                    m['original_title'] == midia.titulo ||
-                    m['name'] == midia.titulo ||
-                    m['original_name'] == midia.titulo) &&
+                (m) =>
+                    (m['title'] == midia.titulo ||
+                        m['original_title'] == midia.titulo ||
+                        m['name'] == midia.titulo ||
+                        m['original_name'] == midia.titulo) &&
                     m['media_type'] == tipoMidia &&
                     !midiasAdicionadas
                         .contains(m["id"]) && //para não repetir mídias
@@ -120,13 +118,15 @@ class Suggestion {
         }
         sugestoesPorGeneroValidadas.add(SugestoesPorGenero(
             idGenero: preferencias.firstWhere(
-                    (preferencia) =>
-                preferencia['name'] == listaSugestoes.nomeGenero,
+                (preferencia) =>
+                    preferencia['name'] == listaSugestoes.nomeGenero,
                 orElse: () => {'id': null})['id'],
             nomeGenero: listaSugestoes.nomeGenero,
             midias: midiasDoGenero));
       }
+
       return sugestoesPorGeneroValidadas;
+
     } catch (e) {
       return null;
     }
@@ -157,22 +157,24 @@ class Suggestion {
         Map<String, dynamic> generoMap = {
           generoId.toString(): midias
               .map((midia) => {
-            'id': midia.id.toString(),
-            'ondeAssistir': midia.ondeAssistir,
-          })
+                    'id': midia.id.toString(),
+                    'ondeAssistir': midia.ondeAssistir,
+                  })
               .toList(),
         };
         formattedSugestoes.add(generoMap);
       });
 
       return formattedSugestoes;
+
     } catch (e) {
       print(e);
       return formattedSugestoes;
     }
   }
 
-  Future<Widget?> CarregarSugestoes(Suggestion? sugestoes, BuildContext context) async {
+  Future<Widget?> CarregarSugestoes(
+      Suggestion? sugestoes, BuildContext context) async {
     CardWidget _card = CardWidget();
     Media _media = Media();
     try {
@@ -183,8 +185,8 @@ class Suggestion {
       List<Future<List<dynamic>>> filmesBatch = [];
       while (filmeIndex < sugestoes.filmes!.length) {
         for (int i = 0;
-        i < filmesBatchSize && filmeIndex < sugestoes.filmes!.length;
-        i++) {
+            i < filmesBatchSize && filmeIndex < sugestoes.filmes!.length;
+            i++) {
           Map<String, dynamic> generoMap = sugestoes.filmes![filmeIndex];
           generoMap.forEach((generoId, midias) {
             int i = 0;
@@ -197,8 +199,8 @@ class Suggestion {
                     'vote_average': m[i]['vote_average'],
                     'overview': m[i]['overview'],
                     'genre_ids': m[i]['genres'].map((genre) {
-                      return genre['id'];
-                    }).toList() ??
+                          return genre['id'];
+                        }).toList() ??
                         [],
                     'title': m[i]['title'],
                     'release_date': m[i]['release_date'],
@@ -222,8 +224,8 @@ class Suggestion {
       List<Future<List<dynamic>>> seriesBatch = [];
       while (serieIndex < sugestoes.series!.length) {
         for (int i = 0;
-        i < seriesBatchSize && serieIndex < sugestoes.series!.length;
-        i++) {
+            i < seriesBatchSize && serieIndex < sugestoes.series!.length;
+            i++) {
           Map<String, dynamic> generoMap = sugestoes.series![serieIndex];
           generoMap.forEach((generoId, midias) {
             int i = 0;
@@ -236,8 +238,8 @@ class Suggestion {
                     'vote_average': m[i]['vote_average'],
                     'overview': m[i]['overview'],
                     'genre_ids': m[i]['genres'].map((genre) {
-                      return genre['id'];
-                    }).toList() ??
+                          return genre['id'];
+                        }).toList() ??
                         [],
                     'original_name': m[i]['original_name'],
                     'first_air_date': m[i]['first_air_date'],
@@ -284,7 +286,7 @@ class Suggestion {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                      const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
                   child: Text(
                     "$nomeGenero",
                     style: const TextStyle(
@@ -329,7 +331,7 @@ class Suggestion {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                      const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
                   child: Text(
                     "$nomeGenero",
                     style: const TextStyle(
@@ -373,26 +375,26 @@ class Suggestion {
               filmesWidgets.isNotEmpty
                   ? Column(children: filmesWidgets)
                   : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        "Não encontramos nada...",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Não encontramos nada...",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Image(
+                                image: AssetImage(
+                                    'assets/images/nenhum-dado-encontrado.png'),
+                                height: 300,
+                                width: 300)
+                          ],
                         ),
-                      ),
-                      Image(
-                          image: AssetImage(
-                              'assets/images/nenhum-dado-encontrado.png'),
-                          height: 300,
-                          width: 300)
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    ),
               //...filmesWidgets,
               const SizedBox(height: 64.0),
               const Row(
@@ -410,31 +412,32 @@ class Suggestion {
               seriesWidgets.isNotEmpty
                   ? Column(children: seriesWidgets)
                   : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        "Não encontramos nada...",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Não encontramos nada...",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Image(
+                                image: AssetImage(
+                                    'assets/images/nenhum-dado-encontrado.png'),
+                                height: 300,
+                                width: 300)
+                          ],
                         ),
-                      ),
-                      Image(
-                          image: AssetImage(
-                              'assets/images/nenhum-dado-encontrado.png'),
-                          height: 300,
-                          width: 300)
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    ),
               //...seriesWidgets,
               const SizedBox(height: 32.0),
             ],
           ),
         );
+
       } else {
         return const SizedBox.shrink();
       }
