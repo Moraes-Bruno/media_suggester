@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:media_suggester/views/review_unica.dart';
-import 'package:media_suggester/models/Media.dart';
+import '../models/Media.dart';
+import '../models/Review.dart';
 
 class Reviews extends StatefulWidget {
   const Reviews({super.key});
@@ -12,12 +13,17 @@ class Reviews extends StatefulWidget {
 }
 
 class _ReviewsState extends State<Reviews> {
-  final Media _media = Media();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  //final MediaRepository _mediaRepository = MediaRepository();
+  final Media _mediaRepository = Media();
+  //final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Review review = Review();
   late Future<QuerySnapshot<Map<String, dynamic>>> listReviews;
 
   carregarReviews(String busca) {
-    if (busca.isNotEmpty) {
+    setState(() {
+      listReviews = review.getReviews(busca);
+    });
+    /*if (busca.isNotEmpty) {
       setState(() {
         listReviews = _firestore
             .collection('reviews')
@@ -36,7 +42,7 @@ class _ReviewsState extends State<Reviews> {
             .orderBy('criacao', descending: true)
             .get();
       });
-    }
+    }*/
   }
 
   @override
@@ -133,7 +139,7 @@ class _ReviewsState extends State<Reviews> {
   }
 
   _carregarFilme(String filmeId) async {
-    Map<String, dynamic> filme = (await _media.getMidia(
+    Map<String, dynamic> filme = (await _mediaRepository.getMidia(
         filmeId, "movie"))[0] as Map<String, dynamic>;
     return filme;
   }
@@ -182,13 +188,16 @@ class _ReviewsState extends State<Reviews> {
                                     width: 45,
                                   );
                                 default:
-                                  return Image(
-                                    image: NetworkImage(
-                                        (snapshot.data as DocumentSnapshot)
-                                            .get("photoUrl")),
-                                    height: 45,
-                                    width: 45,
-                                  );
+                                  return Container(
+                                      width: 45,
+                                      height: 45,
+                                      child: Image(
+                                        image: NetworkImage(
+                                            (snapshot.data as DocumentSnapshot)
+                                                .get("photoUrl")),
+                                        height: 45,
+                                        width: 45,
+                                      ));
                               }
                             }),
 
@@ -210,12 +219,15 @@ class _ReviewsState extends State<Reviews> {
                                         width: 50,
                                       );
                                     default:
-                                      return Text(
-                                          (snapshot.data as DocumentSnapshot)
-                                              .get("name"),
-                                          style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold));
+                                      return SizedBox(
+                                        width: 220,
+                                        child: Text(
+                                            (snapshot.data as DocumentSnapshot)
+                                                .get("name"),
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold)),
+                                      );
                                   }
                                 }),
                             FutureBuilder(
@@ -231,6 +243,7 @@ class _ReviewsState extends State<Reviews> {
                                       );
                                     default:
                                       return SizedBox(
+                                        width: 220,
                                         child: Text(
                                           (snapshot.data
                                               as Map<String, dynamic>)["title"],
@@ -238,7 +251,6 @@ class _ReviewsState extends State<Reviews> {
                                           maxLines: 1,
                                           softWrap: true,
                                         ),
-                                        width: 310,
                                       );
                                   }
                                 }),
@@ -246,13 +258,16 @@ class _ReviewsState extends State<Reviews> {
                               nota,
                               style: const TextStyle(fontSize: 20),
                             ),
-                            Text(
-                              review['descricao'],
-                              style: const TextStyle(
-                                fontSize: 20.0,
+                            SizedBox(
+                              width: 220,
+                              child: Text(
+                                review['descricao'],
+                                style: const TextStyle(
+                                  fontSize: 20.0,
+                                ),
+                                textAlign: TextAlign.start,
+                                maxLines: 2,
                               ),
-                              textAlign: TextAlign.start,
-                              maxLines: 2,
                             ),
                           ],
                         ),

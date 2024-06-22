@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:media_suggester/models/Media.dart';
+import '../models/Media.dart';
 
 class ReviewUnica extends StatefulWidget {
   final dynamic review;
@@ -13,9 +13,10 @@ class ReviewUnica extends StatefulWidget {
 }
 
 class _ReviewUnicaState extends State<ReviewUnica> {
-  final Media _media = Media();
+  //final MediaRepository _mediaRepository = MediaRepository();
+  final Media _mediaRepository = Media();
   _carregarFilme(String filmeId) async {
-    Map<String, dynamic> filme = (await _media.getMidia(
+    Map<String, dynamic> filme = (await _mediaRepository.getMidia(
         filmeId, "movie"))[0] as Map<String, dynamic>;
     return filme;
   }
@@ -26,11 +27,11 @@ class _ReviewUnicaState extends State<ReviewUnica> {
   void initState() {
     super.initState();
     _fetchGeneros();
-    print(widget.review['filmeId']);
+    //print(widget.review['filmeId']);
   }
 
   Future<void> _fetchGeneros() async {
-    final genres = await _media.fetchGeneros();
+    final genres = await _mediaRepository.fetchGeneros();
     setState(() {
       _generos = genres;
     });
@@ -97,13 +98,16 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image(
-                          image: NetworkImage(
-                              (snapshot.data as DocumentSnapshot)
-                                  .get("photoUrl")),
-                          height: 200,
-                          width: 200,
-                        ),
+                        Container(
+                            width: 200,
+                            height: 200,
+                            child: Image(
+                              image: NetworkImage(
+                                  (snapshot.data as DocumentSnapshot)
+                                      .get("photoUrl")),
+                              height: 200,
+                              width: 200,
+                            )),
                         const SizedBox(
                           height: 10,
                         ),
@@ -178,7 +182,7 @@ class _ReviewUnicaState extends State<ReviewUnica> {
                                                     maxLines: 3,
                                                     softWrap: true,
                                                   ),
-                                                  width: 340,
+                                                  width: 220,
                                                 ),
                                                 for (var genero
                                                     in ((snapshot.data as Map<
