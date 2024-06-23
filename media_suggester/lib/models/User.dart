@@ -191,6 +191,48 @@ class UserModel {
 
     return add;
   }
+
+  Future<void> alterarPerfil(BuildContext context, String nickname) async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    throw Exception('Usuário não autenticado');
+  }
+
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({
+          'nickname': nickname.isNotEmpty ? nickname : user.displayName,
+        });
+
+    // ignore: use_build_context_synchronously
+    showConfirmationDialog(context, 'Apelido atualizado com sucesso');
+  } catch (e) {
+    print(e);
+  }
+}
+
+void showConfirmationDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Apelido Atualizado"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+  
 }
 
 

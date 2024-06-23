@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/views/CadastroPreferencias.dart';
-
+import 'package:media_suggester/controller/user_controller.dart';
 class Alterar extends StatelessWidget {
   const Alterar({super.key});
 
@@ -10,41 +10,7 @@ class Alterar extends StatelessWidget {
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final TextEditingController _controller = TextEditingController();
-
-     void showConfirmationDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Apelido Atualizado"),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-    // ignore: non_constant_identifier_names
-    void AlterarPerfil(String nickname) async {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user?.uid)
-            .update({'nickname': nickname != "" ? nickname: user?.displayName});
-
-            // ignore: use_build_context_synchronously
-            showConfirmationDialog(context, 'Apelido atualizado com sucesso');
-      } catch (e) {
-        null;
-      }
-    }
+    final UserController _userController = UserController();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -173,10 +139,10 @@ class Alterar extends StatelessWidget {
                       width: 264,
                       height: 40,
                       child: ElevatedButton(
-                        onPressed: () {
-                          String nickname = _controller.text;
-                          AlterarPerfil(nickname);
-                        },
+                         onPressed: () {
+                                String nickname = _controller.text;
+                                _userController.alterarPerfil(context, nickname);
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.secondary,

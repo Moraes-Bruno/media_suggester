@@ -43,4 +43,8 @@ class UserController extends PageController {
   Future<void> saveSelectedGenres_serie(List<dynamic> genres) async {
     await _user.saveSelectedGenres_serie(genres);
   }
+
+  Future<void> alterarPerfil(BuildContext context, String nickname) async {
+    await _user.alterarPerfil(context, nickname);
+  }
 }
