@@ -165,7 +165,8 @@ class Perfil extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
+                    //-------------------botao alterar------------------
+                    /*Container(
                       margin: const EdgeInsets.only(top: 16, bottom: 16),
                       width: 250,
                       height: 40,
@@ -190,7 +191,7 @@ class Perfil extends StatelessWidget {
                                   Theme.of(context).colorScheme.inversePrimary),
                         ),
                       ),
-                    ),
+                    ),*/
                     Container(
                       margin: const EdgeInsets.only(top: 16, bottom: 16),
                       width: 250,
