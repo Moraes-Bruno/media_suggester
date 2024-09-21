@@ -47,4 +47,8 @@ class UserController extends PageController {
   Future<void> alterarPerfil(BuildContext context, String nickname) async {
     await _user.alterarPerfil(context, nickname);
   }
+
+  Future <bool> checkFavorito(String nomeMedia,String uid) async {
+    return _user.checkFavorito(nomeMedia,uid);
+  }
 }

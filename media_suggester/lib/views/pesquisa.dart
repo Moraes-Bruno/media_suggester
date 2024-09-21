@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:media_suggester/controller/media_controller.dart';
 import 'package:media_suggester/views/Detalhes.dart';
-import 'dart:convert';
 import 'package:media_suggester/views/review_unica.dart';
 import 'package:media_suggester/models/Media.dart';
 import 'package:media_suggester/widgets/searchWidget.dart';

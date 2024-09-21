@@ -77,6 +77,7 @@ class Suggestion {
         print('Erro ao fazer requisição POST: $erro');
       }
     }
+    return null;
   }
 
   Future<List<SugestoesPorGenero>?>

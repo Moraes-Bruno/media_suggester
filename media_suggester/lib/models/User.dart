@@ -192,6 +192,32 @@ class UserModel {
     return add;
   }
 
+  Future <bool> checkFavorito (String nomeMedia,String uid) async{
+    bool checked = false;
+   try {
+      DocumentReference userDoc =
+          _firestore.collection('users').doc(uid);
+      
+      print(userLogado?.displayName);
+
+      DocumentSnapshot userSnapshot = await userDoc.get();
+
+      List favoritos = userSnapshot['favoritos'] ?? [];
+
+      if (favoritos.contains(nomeMedia)) {
+        checked = true;
+      }else {
+         checked = false;
+          }      
+    } catch (e) {
+      print(e);
+    }
+
+    return checked;
+
+  }
+
+
   Future<void> alterarPerfil(BuildContext context, String nickname) async {
   User? user = FirebaseAuth.instance.currentUser;
   if (user == null) {

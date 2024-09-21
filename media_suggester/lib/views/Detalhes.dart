@@ -27,8 +27,8 @@ class _DetalhesState extends State<Detalhes> {
 
   Map<int, String> _generos = {};
   late Future<bool> isAdded;
-
   User? user;
+  bool favoritado = false;
 
   @override
   void initState() {
@@ -36,6 +36,14 @@ class _DetalhesState extends State<Detalhes> {
     _fetchGeneros();
     user = _auth.currentUser;
     listReviews = _mediaController.fetchReviews(widget.media['id']);
+    mudarIcone();
+  }
+
+  void mudarIcone() async{
+    bool isfavoritado = await _userController.checkFavorito(widget.media['title'] ?? widget.media['original_name'],user!.uid);
+    setState(() {
+      favoritado = isfavoritado;
+    });
   }
 
   Future<void> _fetchGeneros() async {
@@ -51,9 +59,14 @@ class _DetalhesState extends State<Detalhes> {
     if (isAdded) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            "${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso.",
-            style: const TextStyle(fontSize: 17),
+          content: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                "${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso.",
+                style: const TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
 
           duration: const Duration(seconds: 2), // Define a duração do SnackBar
@@ -62,9 +75,14 @@ class _DetalhesState extends State<Detalhes> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            "${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso.",
-            style: const TextStyle(fontSize: 17),
+          content: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                "${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso.",
+                style: const TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
 
           duration: const Duration(seconds: 2), // Define a duração do SnackBar
@@ -129,7 +147,7 @@ class _DetalhesState extends State<Detalhes> {
                                       '',
                                   user!.uid);
                               bool adicionado = await isAdded;
-
+                              mudarIcone();
                               mostrarMensagem(adicionado, context);
                             },
                             style: ElevatedButton.styleFrom(
@@ -138,7 +156,8 @@ class _DetalhesState extends State<Detalhes> {
                                 shape: const CircleBorder(),
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
-                              Icons.favorite_border_outlined,
+                              // ignore: unrelated_type_equality_checks
+                              favoritado == true ? Icons.favorite : Icons.favorite_border_outlined,
                               color:
                                   Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
@@ -345,9 +364,9 @@ class _DetalhesState extends State<Detalhes> {
                         ),
                       );
                     default:
-                      return CarouselSlider(
+                      return  CarouselSlider(
                         items: _obterComentarios(context, snapshot),
-                        options: CarouselOptions(
+                        options:  CarouselOptions(
                           aspectRatio: 2.0,
                           enlargeCenterPage: true,
                           pageViewKey:
