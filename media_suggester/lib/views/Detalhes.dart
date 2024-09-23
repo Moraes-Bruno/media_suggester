@@ -29,7 +29,8 @@ class _DetalhesState extends State<Detalhes> {
   late Future<bool> isAdded;
   User? user;
   bool favoritado = false;
-
+  String notaMedia = '';
+  
   @override
   void initState() {
     super.initState();
@@ -37,6 +38,7 @@ class _DetalhesState extends State<Detalhes> {
     user = _auth.currentUser;
     listReviews = _mediaController.fetchReviews(widget.media['id']);
     mudarIcone();
+    mediaNota();
   }
 
   void mudarIcone() async{
@@ -45,6 +47,7 @@ class _DetalhesState extends State<Detalhes> {
       favoritado = isfavoritado;
     });
   }
+
 
   Future<void> _fetchGeneros() async {
     final firstAirDate = widget.media['first_air_date'];
@@ -91,8 +94,16 @@ class _DetalhesState extends State<Detalhes> {
     }
   }
 
+  Future <void> mediaNota() async {
+  String mediaNota = await _mediaController.getNotaMedia(widget.media['id']);
+  setState(() {
+    notaMedia = mediaNota;
+  });
+}
+
   @override
   Widget build(BuildContext context) {
+    
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
     DateTime dateTime = DateTime.parse(
@@ -266,9 +277,9 @@ class _DetalhesState extends State<Detalhes> {
                                 style: const TextStyle(fontSize: 18),
                               ),
                               const SizedBox(width: 50),
-                              const Text(
-                                'A definir',
-                                style: TextStyle(fontSize: 18),
+                              Text(
+                                '$notaMedia/5',
+                                style: const TextStyle(fontSize: 18),
                               ),
                             ],
                           ),
@@ -531,5 +542,6 @@ class _DetalhesState extends State<Detalhes> {
       ));
     }
     return widgets;
+    
   }
 }

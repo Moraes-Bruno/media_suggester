@@ -41,4 +41,10 @@ class MediaController extends PageController {
   Future<List<dynamic>> fetchGenres_serie() async {
     return _media.fetchGenres_serie();
   }
+
+  //-------Relativo a Nota Media do conteudo---------\\
+
+  Future<String> getNotaMedia(int filmeId) async {
+    return _media.getNotaMedia(filmeId);
+  }
 }

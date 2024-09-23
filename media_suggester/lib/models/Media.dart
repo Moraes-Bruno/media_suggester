@@ -77,8 +77,9 @@ class Media {
       throw Exception('Failed to load genres');
     }
   }
+
   //-----------------------Movie---------------------------------
-  Future <List<dynamic>>  fetchGenres_movie() async {
+  Future<List<dynamic>> fetchGenres_movie() async {
     final url =
         'https://api.themoviedb.org/3/genre/movie/list?api_key=$chaveApi&language=pt-BR';
 
@@ -90,9 +91,11 @@ class Media {
       throw Exception('Failed to load genres');
     }
   }
+
   //---------------------serie-----------------------------------
   Future<List<dynamic>> fetchGenres_serie() async {
-    final url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=$chaveApi&language=pt-BR';
+    final url =
+        'https://api.themoviedb.org/3/genre/tv/list?api_key=$chaveApi&language=pt-BR';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       return json.decode(response.body)['genres'];
@@ -110,4 +113,34 @@ class Media {
         .where('filmeId', isEqualTo: mediaId.toString())
         .get();
   }
+
+  // Função para retornar a nota media da media de acordo com a nota dos usuarios
+  Future<String> getNotaMedia(int filmeId) async {
+  double valorTotal = 0;
+  int totalReviews = 0;
+
+  try {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('reviews')
+        .where('filmeId', isEqualTo: filmeId.toString())
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      totalReviews = snapshot.docs.length;
+
+      for (var doc in snapshot.docs) {
+        var nota = doc.get('nota') as num;
+        
+        valorTotal += nota.toDouble(); 
+      }
+    }
+
+    return (totalReviews > 0) 
+      ? (valorTotal / totalReviews).toStringAsFixed(1) 
+      : '0';
+  } catch (e) {
+    return '0';
+  }
+}
+
 }
