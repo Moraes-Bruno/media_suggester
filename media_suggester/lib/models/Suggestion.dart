@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/models/Media.dart';
 
+import '../controller/media_controller.dart';
 import '../widgets/CardWidget.dart';
 import 'MediaSimplified.dart';
 import 'SuggestionsByGenre.dart';
@@ -13,6 +14,8 @@ import 'SuggestionsByGenre.dart';
 class Suggestion {
   List<dynamic>? filmes;
   List<dynamic>? series;
+
+  MediaController? _mediaController = new MediaController();
 
   Suggestion(this.filmes, this.series);
 
@@ -35,22 +38,42 @@ class Suggestion {
         .get();
   }
 
-  Future<void> SetSuggestions(userId, filmes, series) async {
-    FirebaseFirestore.instance.collection('suggestions').doc(userId).set({
+  Future<void> SetSuggestions(userId, List<Map<String, dynamic>>? filmes,
+      List<Map<String, dynamic>>? series) async {
+    await FirebaseFirestore.instance.collection('suggestions').doc(userId).set({
       'filmes': filmes,
       'series': series,
     });
   }
 
-  Future<List<dynamic>?> GerarSugestoes(
-      String tipoMidia, String generos) async {
-    var url = Uri.parse('https://mediasuggesterapi.azurewebsites.net/');
+  Future<Map<int, List<dynamic>>?> GerarSugestoes(
+      String tipoMidia, List<int> generos) async {
+    Map<int, List<int>> sugestoes = new Map<int, List<int>>();
+    for (int genero in generos) {
+      List<dynamic>? midiasDoGenero =
+          await _mediaController?.getBestMediasOfTheGenre(genero, tipoMidia);
 
-    var request = {"tipoMidia": tipoMidia, "generos": generos};
+      sugestoes[genero] =
+          midiasDoGenero!.map((midia) => midia["id"] as int).toList();
+    }
 
-    print("Tentando gerar sugestões...");
-    bool sugestoesNaoGeradas = true;
-    while (sugestoesNaoGeradas) {
+    return sugestoes;
+  }
+
+  Future<void> GerarSugestoesPersonalizadas(String tipoMidia,
+      String likedMediaId, String userId, String reviewText) async {
+    var url = Uri.parse('a definir');
+
+    var request = {
+      "MediaType": tipoMidia,
+      "MediaId": likedMediaId,
+      "UserId": userId,
+      "ReviewText": reviewText
+    };
+
+    print("Tentando gerar sugestões personalizadas...");
+    bool sugestoesForamGeradas = false;
+    while (!sugestoesForamGeradas) {
       try {
         var resposta = await http.post(
           url,
@@ -62,114 +85,45 @@ class Suggestion {
         );
 
         if (resposta.statusCode == 200) {
-          sugestoesNaoGeradas = false;
-
-          Map<String, dynamic> respostaMapa = json.decode(resposta.body);
-
-          var midias = respostaMapa['midias'];
-
-          return midias as List<dynamic>;
+          sugestoesForamGeradas = true;
+          print("Sugestões personalizadas gravadas no banco com sucesso.");
         } else {
-          print('Erro na requisição POST: ${resposta.statusCode}');
+          print('Erro na requisição POST. Código: ${resposta.statusCode}');
           print(resposta.body);
         }
       } catch (erro) {
-        print('Erro ao fazer requisição POST: $erro');
+        print('Erro tentar gerar sugestões personalizadas: $erro');
       }
-    }
-    return null;
-  }
-
-  Future<List<SugestoesPorGenero>?>
-      verificarSeApiPossuiDadosDasSugestoesGeradas(
-          List<dynamic> sugestoesGeradas,
-          List<Map<String, dynamic>> preferencias,
-          String tipoMidia) async {
-    Media _media = Media();
-    List<SugestoesPorGenero>? sugestoesPorGeneroValidadas = [];
-    final List<int?> midiasAdicionadas = [];
-    try {
-      List<SugestoesPorGenero> sugestoesPorGenero =
-          SugestoesPorGenero.fromJsonList(sugestoesGeradas);
-
-      for (SugestoesPorGenero listaSugestoes in sugestoesPorGenero) {
-        List<Midia> midiasDoGenero = [];
-        for (Midia midia in listaSugestoes.midias) {
-          var midias = await _media.searchMedia(midia.titulo!);
-          if (midias.isNotEmpty) {
-            var m = midias.firstWhere(
-                (m) =>
-                    (m['title'] == midia.titulo ||
-                        m['original_title'] == midia.titulo ||
-                        m['name'] == midia.titulo ||
-                        m['original_name'] == midia.titulo) &&
-                    m['media_type'] == tipoMidia &&
-                    !midiasAdicionadas
-                        .contains(m["id"]) && //para não repetir mídias
-                    m["poster_path"] != null,
-                orElse: () => null);
-            if (m != null) {
-              midiasDoGenero.add(Midia(
-                  titulo: m["title"] ?? m["name"] ?? m['original_name'] ?? '',
-                  ondeAssistir: midia.ondeAssistir,
-                  id: m["id"] ?? 0));
-              midiasAdicionadas.add(m["id"]);
-            }
-          }
-        }
-        sugestoesPorGeneroValidadas.add(SugestoesPorGenero(
-            idGenero: preferencias.firstWhere(
-                (preferencia) =>
-                    preferencia['name'] == listaSugestoes.nomeGenero,
-                orElse: () => {'id': null})['id'],
-            nomeGenero: listaSugestoes.nomeGenero,
-            midias: midiasDoGenero));
-      }
-
-      return sugestoesPorGeneroValidadas;
-
-    } catch (e) {
-      return null;
     }
   }
 
   Future<List<Map<String, dynamic>>> FormatarDadosParaFirestore(
-      List<SugestoesPorGenero>? sugestoesPorGenero) async {
+      Map<int, List<dynamic>>? sugestoesPorGenero) async {
     List<Map<String, dynamic>> formattedSugestoes = [];
     try {
-      if (sugestoesPorGenero == null) return [];
-
-      Map<int, List<Midia>> meuMapa = {};
-
-      for (SugestoesPorGenero genero in sugestoesPorGenero) {
-        List<Midia> midiaRegistros = [];
-        for (Midia midia in genero.midias) {
-          midiaRegistros.add(
-            Midia(
-              id: midia.id as int,
-              ondeAssistir: midia.ondeAssistir,
-            ),
-          );
-        }
-        meuMapa[genero.idGenero!] = midiaRegistros;
+      if (sugestoesPorGenero!.isEmpty) {
+        print("Nenhuma sugestão disponível.");
+        return [];
       }
 
-      meuMapa.forEach((generoId, midias) {
-        Map<String, dynamic> generoMap = {
-          generoId.toString(): midias
-              .map((midia) => {
-                    'id': midia.id.toString(),
-                    'ondeAssistir': midia.ondeAssistir,
-                  })
-              .toList(),
-        };
-        formattedSugestoes.add(generoMap);
+      sugestoesPorGenero.forEach((generoId, midias) {
+        String generoIdStr = generoId.toString();
+
+        List<Map<String, dynamic>> midiaRegistros = midias.map((midia) {
+          return {
+            'id': midia.toString(),
+          };
+        }).toList();
+
+        formattedSugestoes.add({
+          generoIdStr: midiaRegistros,
+        });
       });
 
+      print("Sugestões formatadas: $formattedSugestoes");
       return formattedSugestoes;
-
     } catch (e) {
-      print(e);
+      print("Erro ao formatar sugestões: $e");
       return formattedSugestoes;
     }
   }
@@ -438,7 +392,6 @@ class Suggestion {
             ],
           ),
         );
-
       } else {
         return const SizedBox.shrink();
       }

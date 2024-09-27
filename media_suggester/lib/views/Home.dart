@@ -78,35 +78,21 @@ class _HomeState extends State<Home> {
               List<Map<String, dynamic>>.from(
                   preferences!.get('genders_serie') ?? []);
 
-          List<dynamic> sugestoes_series =
+          Map<int, List<dynamic>>? sugestoes_filmes =
               await _suggestionController.GerarSugestoes(
-                      "series",
-                      preferencias_series
-                          .map((serie) => serie['name'])
-                          .join(', ')) ??
-                  [];
-          print(sugestoes_series);
-
-          List<dynamic> sugestoes_filmes =
-              await _suggestionController.GerarSugestoes(
-                      "filmes",
-                      preferencias_filmes
-                          .map((filme) => filme['name'])
-                          .join(', ')) ??
-                  [];
+                  "movie",
+                  preferencias_filmes
+                      .map((filme) => filme['id'] as int)
+                      .toList());
           print(sugestoes_filmes);
 
-          //verificando se as mídias recomendadas existem na api do themoviedb
-
-          List<SugestoesPorGenero>? sugestoesSeriesValidadas =
-              await _suggestionController
-                  .VerificarSeApiPossuiDadosDasSugestoesGeradas(
-                      sugestoes_series, preferencias_series, "tv");
-
-          List<SugestoesPorGenero>? sugestoesFilmesValidadas =
-              await _suggestionController
-                  .VerificarSeApiPossuiDadosDasSugestoesGeradas(
-                      sugestoes_filmes, preferencias_filmes, "movie");
+          Map<int, List<dynamic>>? sugestoes_series =
+              await _suggestionController.GerarSugestoes(
+                  "tv",
+                  preferencias_series
+                      .map((serie) => serie['id'] as int)
+                      .toList());
+          print(sugestoes_series);
 
           setState(() {
             _carregandoTexto = "Quase lá...";
@@ -114,16 +100,16 @@ class _HomeState extends State<Home> {
 
           List<Map<String, dynamic>> sugestoesFilmesFormatadasParaRegistro =
               await _suggestionController.FormatarDadosParaFirestore(
-                  sugestoesFilmesValidadas);
+                  sugestoes_filmes);
           print(sugestoesFilmesFormatadasParaRegistro);
 
           List<Map<String, dynamic>> sugestoesSeriesFormatadasParaRegistro =
               await _suggestionController.FormatarDadosParaFirestore(
-                  sugestoesSeriesValidadas);
+                  sugestoes_series);
           print(sugestoesSeriesFormatadasParaRegistro);
 
           try {
-            //Salvando recomendações validadas no firebase
+            //Salvando recomendações no firebase
             await _suggestionController.SetSuggestions(
                 user.uid,
                 sugestoesFilmesFormatadasParaRegistro,
@@ -132,8 +118,8 @@ class _HomeState extends State<Home> {
             print(e);
           }
           sugestoes = Suggestion.fromGeneratedInput(
-              sugestoesFilmesFormatadasParaRegistro,
-              sugestoesSeriesFormatadasParaRegistro);
+              sugestoesFilmesFormatadasParaRegistro!,
+              sugestoesSeriesFormatadasParaRegistro!);
         } else {
           DocumentSnapshot? suggestionSnapshot =
               await _suggestionController.GetSuggestions(user.uid);

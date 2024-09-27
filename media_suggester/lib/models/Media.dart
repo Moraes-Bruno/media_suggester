@@ -143,4 +143,19 @@ class Media {
   }
 }
 
+//função que vai "gerar as recomendações" padrão a partir de agora
+  Future<List<dynamic>?> getBestMediasOfTheGenre(int generoId, String tipoMidia) async {
+
+    final String url =
+    '$urlBase/discover/$tipoMidia?api_key=$chaveApi&language=pt-BR&sort_by=popularity.desc&vote_average.gte=7&vote_count.gte=1000&with_genres=$generoId';
+
+    final resposta = await http.get(Uri.parse(url));
+
+    if (resposta.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(resposta.body);
+      return data['results'];
+    } else {
+      throw Exception('Falha ao buscar Conteudo');
+    }
+  }
 }

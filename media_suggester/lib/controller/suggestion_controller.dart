@@ -6,30 +6,27 @@ import '../models/SuggestionsByGenre.dart';
 class SuggestionController extends PageController {
   final Suggestion _suggestion = Suggestion(null, null);
 
-  Future<List<dynamic>?> GerarSugestoes(
-      String tipoMidia, String generos) async {
+  Future<Map<int, List<dynamic>>?> GerarSugestoes(
+      String tipoMidia, List<int> generos) async {
     return _suggestion.GerarSugestoes(tipoMidia, generos);
+  }
+
+  Future<void> GerarSugestoesPersonalizadas(String tipoMidia,
+      String likedMediaId, String userId, String reviewText) async {
+    return _suggestion.GerarSugestoesPersonalizadas(
+        tipoMidia, likedMediaId, userId, reviewText);
   }
 
   Future<DocumentSnapshot?> GetSuggestions(userId) async {
     return _suggestion.GetSuggestions(userId);
   }
 
-  Future<void> SetSuggestions(userId, filmes, series) async {
+  Future<void> SetSuggestions(userId,  List<Map<String, dynamic>>? filmes, List<Map<String, dynamic>>? series) async {
     _suggestion.SetSuggestions(userId, filmes, series);
   }
 
-  Future<List<SugestoesPorGenero>?>
-      VerificarSeApiPossuiDadosDasSugestoesGeradas(
-          List<dynamic> sugestoesGeradas,
-          List<Map<String, dynamic>> preferencias,
-          String tipoMidia) async {
-    return _suggestion.verificarSeApiPossuiDadosDasSugestoesGeradas(
-        sugestoesGeradas, preferencias, tipoMidia);
-  }
-
   Future<List<Map<String, dynamic>>> FormatarDadosParaFirestore(
-      List<SugestoesPorGenero>? sugestoesPorGenero) async {
+      Map<int,List<dynamic>>? sugestoesPorGenero) async {
     return _suggestion.FormatarDadosParaFirestore(sugestoesPorGenero);
   }
 

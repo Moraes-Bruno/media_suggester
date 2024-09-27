@@ -29,7 +29,7 @@ class MediaController extends PageController {
     return _media.fetchGeneros(firstAirDate: firstAirDate);
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchReviews(int mediaId){
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchReviews(int mediaId) {
     return _media.fetchReviews(mediaId);
   }
 
@@ -46,5 +46,10 @@ class MediaController extends PageController {
 
   Future<String> getNotaMedia(int filmeId) async {
     return _media.getNotaMedia(filmeId);
+  }
+
+  //função que vai "gerar as recomendações" padrão a partir de agora
+  Future<List<dynamic>?> getBestMediasOfTheGenre(int generoId, String tipoMidia) async {
+    return _media.getBestMediasOfTheGenre(generoId, tipoMidia);
   }
 }

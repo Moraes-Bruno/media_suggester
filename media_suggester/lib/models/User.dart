@@ -41,7 +41,7 @@ class UserModel {
   }
 
   Future<DocumentSnapshot?> GetPreferences(userId) async {
-    DocumentSnapshot preferences = await FirebaseFirestore.instance
+    return await FirebaseFirestore.instance
         .collection("preferences")
         .doc(userId)
         .get();
