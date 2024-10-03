@@ -51,6 +51,24 @@ class _Genre_movieState extends State<Genre_movie> {
   void saveSelectedGenres() {
     List<dynamic> selectedGenres =
         genres.where((genre) => genre['selected'] ?? false).toList();
+
+    if (selectedGenres.isEmpty) {
+      // Exibe uma mensagem de erro se nenhum gênero foi selecionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor, selecione ao menos um gênero!!',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 16.0),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+      return;
+    }
+
     print('Selected Genres: $selectedGenres');
     print(user?.uid);
 
@@ -117,13 +135,19 @@ class _Genre_movieState extends State<Genre_movie> {
               value: genres[index]['selected'] ?? false,
               checkColor: Colors.white,
               activeColor: Theme.of(context).colorScheme.primary,
-              // Definindo a cor da caixa de seleção como vermelho
               onChanged: (value) {
                 setState(() {
                   if (value! && selectedCount >= 5) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Você só pode selecionar até 5 gêneros.'),
+                        content: Text(
+                          'Você só pode selecionar até 5 gêneros.',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontSize: 16.0),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     );
                   } else {

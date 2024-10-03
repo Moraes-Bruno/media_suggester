@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/pages/Home.dart';
 
-
 class Gender_serie extends StatefulWidget {
   @override
   _Gender_serieState createState() => _Gender_serieState();
@@ -34,8 +33,9 @@ class _Gender_serieState extends State<Gender_serie> {
   }
 
   Future<void> fetchGenres() async {
-    final apiKey = media.chaveApi ;
-    final url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=$apiKey&language=pt-BR';
+    final apiKey = media.chaveApi;
+    final url =
+        'https://api.themoviedb.org/3/genre/tv/list?api_key=$apiKey&language=pt-BR';
 
     final response = await http.get(Uri.parse(url));
 
@@ -49,11 +49,28 @@ class _Gender_serieState extends State<Gender_serie> {
   }
 
   void saveSelectedGenres() {
-    List<dynamic> selectedGenres = genres.where((genre) => genre['selected'] ?? false).toList();
+    List<dynamic> selectedGenres =
+        genres.where((genre) => genre['selected'] ?? false).toList();
+
+    if (selectedGenres.isEmpty) {
+      // Exibe uma mensagem de erro se nenhum gênero foi selecionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+          'Por favor, selecione ao menos um gênero!!',
+          style: TextStyle(
+              fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16.0),
+          textAlign: TextAlign.center,
+        )),
+      );
+      return;
+    }
+
     print('Selected Genres: $selectedGenres');
     print(user?.uid);
 
-    List<Map<String, dynamic>> selectedGenresData = selectedGenres.take(5).map((genre) {
+    List<Map<String, dynamic>> selectedGenresData =
+        selectedGenres.take(5).map((genre) {
       return {
         'id': genre['id'],
         'name': genre['name'],
@@ -63,9 +80,9 @@ class _Gender_serieState extends State<Gender_serie> {
     _firestore.collection('preferences').doc(user?.uid).update({
       'genders_serie': selectedGenresData,
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Home(user!)));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => Home(user!)));
   }
-
 
   void _showPopup() {
     showDialog(
@@ -73,13 +90,21 @@ class _Gender_serieState extends State<Gender_serie> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Aviso!!'),
-          content: Text('Você pode selecionar até cinco gêneros de séries. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.', style: TextStyle(color: Colors.white,),),
+          content: Text(
+            'Você pode selecionar até cinco gêneros de séries. Caso não tenha preferência por algum gênero específico, basta deixar o campo correspondente em branco antes de salvar suas escolhas.',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Fechar', style: TextStyle(color: Colors.white),),
+              child: Text(
+                'Fechar',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -105,13 +130,20 @@ class _Gender_serieState extends State<Gender_serie> {
               title: Text(genres[index]['name']),
               value: genres[index]['selected'] ?? false,
               checkColor: Colors.white,
-              activeColor: Theme.of(context).colorScheme.primary, // Definindo a cor da caixa de seleção como vermelho
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 setState(() {
                   if (value! && selectedCount >= 5) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Você só pode selecionar até 5 gêneros.'),
+                        content: Text(
+                          'Você só pode selecionar até 5 gêneros.',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontSize: 16.0),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     );
                   } else {
