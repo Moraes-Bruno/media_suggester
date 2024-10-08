@@ -489,7 +489,7 @@ class _DetalhesState extends State<Detalhes> {
                                       );
                                     default:
                                       return SizedBox(
-                                        width: 180,
+                                        //width: 180,
                                         child: Text(
                                             (snapshot.data as DocumentSnapshot)
                                                 .get("name"),
@@ -504,7 +504,7 @@ class _DetalhesState extends State<Detalhes> {
                               style: const TextStyle(fontSize: 20),
                             ),
                             SizedBox(
-                              width: 180,
+                              //width: 180,
                               child: Text(
                                 review['descricao'],
                                 style: const TextStyle(
