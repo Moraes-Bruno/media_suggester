@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../controller/personalizedSuggestions_controller.dart';
+
 class EscreverReview extends StatefulWidget {
   final Map<String, dynamic> media;
 
@@ -16,6 +18,8 @@ class _EscreverReviewState extends State<EscreverReview> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? user;
   TextEditingController controller = TextEditingController();
+  final PersonalizedSuggestionController _personalizedSuggestionController =
+  new PersonalizedSuggestionController();
   int _nota = 0;
 
   @override
@@ -47,7 +51,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                   Navigator.of(context).pop(); // Fecha o diálogo
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  backgroundColor: Theme
+                      .of(context)
+                      .colorScheme
+                      .secondary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -55,7 +62,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                   'Fechar',
                   style: TextStyle(
                       fontSize: 20,
-                      color: Theme.of(context).colorScheme.inversePrimary),
+                      color: Theme
+                          .of(context)
+                          .colorScheme
+                          .inversePrimary),
                 ),
               ),
             ],
@@ -79,7 +89,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                   Navigator.of(context).pop(); // Fecha o diálogo
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  backgroundColor: Theme
+                      .of(context)
+                      .colorScheme
+                      .secondary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -87,7 +100,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                   'Fechar',
                   style: TextStyle(
                       fontSize: 20,
-                      color: Theme.of(context).colorScheme.inversePrimary),
+                      color: Theme
+                          .of(context)
+                          .colorScheme
+                          .inversePrimary),
                 ),
               ),
             ],
@@ -104,6 +120,12 @@ class _EscreverReviewState extends State<EscreverReview> {
     review["user"] = _firestore.collection("users").doc(user!.uid);
     _firestore.collection("reviews").add(review).then((snapshot) {
       if (snapshot.id.isNotEmpty) {
+        _personalizedSuggestionController
+            .GerarSugestoesPersonalizadasParaReview(
+            widget.media['title'] == "" ||
+                widget.media['title'] == null
+                ? 'tv'
+                : 'movie', review["filmeId"], user!.uid, controller.text);
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -117,7 +139,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                     Navigator.of(context).pop();
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    backgroundColor: Theme
+                        .of(context)
+                        .colorScheme
+                        .secondary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
@@ -125,7 +150,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                     'Continuar',
                     style: TextStyle(
                         fontSize: 20,
-                        color: Theme.of(context).colorScheme.inversePrimary),
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .inversePrimary),
                   ),
                 ),
               ],
@@ -140,7 +168,10 @@ class _EscreverReviewState extends State<EscreverReview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme
+            .of(context)
+            .colorScheme
+            .primary,
         title: const Text(
           "ESCREVER REVIEW",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -159,7 +190,8 @@ class _EscreverReviewState extends State<EscreverReview> {
                 height: 260,
                 child: Image(
                   image: NetworkImage(
-                      'https://image.tmdb.org/t/p/w400/${widget.media['poster_path']}'),
+                      'https://image.tmdb.org/t/p/w400/${widget
+                          .media['poster_path']}'),
                   fit: BoxFit.fitWidth,
                 ),
               ),
@@ -173,7 +205,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                 ),
               ),
               Container(
-                width: MediaQuery.of(context).size.width - 30,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width - 30,
                 margin: const EdgeInsets.only(top: 30),
                 decoration: const BoxDecoration(
                     color: Color.fromARGB(255, 42, 42, 42),
@@ -215,7 +250,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                             /*Theme.of(context).colorScheme:utilizado para acessar as cores do tema,
                       a unica parte que se altera é o final*/
                             fillColor:
-                                Theme.of(context).colorScheme.inversePrimary,
+                            Theme
+                                .of(context)
+                                .colorScheme
+                                .inversePrimary,
                             hintText: "Escreva sua review aqui",
                             hintStyle: const TextStyle(color: Colors.black38)),
                       ),
@@ -227,7 +265,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                 ),
               ),
               Container(
-                width: MediaQuery.of(context).size.width - 30,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width - 30,
                 margin: const EdgeInsets.only(top: 15, bottom: 30),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -237,7 +278,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.tertiary,
+                        backgroundColor: Theme
+                            .of(context)
+                            .colorScheme
+                            .tertiary,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
@@ -249,7 +293,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color:
-                                  Theme.of(context).colorScheme.inversePrimary),
+                              Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .inversePrimary),
                         ),
                       ),
                     ),
@@ -259,7 +306,10 @@ class _EscreverReviewState extends State<EscreverReview> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
+                          Theme
+                              .of(context)
+                              .colorScheme
+                              .secondary,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10)),
                         ),
@@ -270,7 +320,8 @@ class _EscreverReviewState extends State<EscreverReview> {
                             style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context)
+                                color: Theme
+                                    .of(context)
                                     .colorScheme
                                     .inversePrimary),
                           ),

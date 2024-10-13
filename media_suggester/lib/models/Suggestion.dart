@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/models/Media.dart';
+import 'package:media_suggester/models/PersonalizedSuggestion.dart';
 
 import '../controller/media_controller.dart';
 import '../widgets/CardWidget.dart';
@@ -60,43 +61,6 @@ class Suggestion {
     return sugestoes;
   }
 
-  Future<void> GerarSugestoesPersonalizadas(String tipoMidia,
-      String likedMediaId, String userId, String reviewText) async {
-    var url = Uri.parse('a definir');
-
-    var request = {
-      "MediaType": tipoMidia,
-      "MediaId": likedMediaId,
-      "UserId": userId,
-      "ReviewText": reviewText
-    };
-
-    print("Tentando gerar sugestões personalizadas...");
-    bool sugestoesForamGeradas = false;
-    while (!sugestoesForamGeradas) {
-      try {
-        var resposta = await http.post(
-          url,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          },
-          body: jsonEncode(request),
-        );
-
-        if (resposta.statusCode == 200) {
-          sugestoesForamGeradas = true;
-          print("Sugestões personalizadas gravadas no banco com sucesso.");
-        } else {
-          print('Erro na requisição POST. Código: ${resposta.statusCode}');
-          print(resposta.body);
-        }
-      } catch (erro) {
-        print('Erro tentar gerar sugestões personalizadas: $erro');
-      }
-    }
-  }
-
   Future<List<Map<String, dynamic>>> FormatarDadosParaFirestore(
       Map<int, List<dynamic>>? sugestoesPorGenero) async {
     List<Map<String, dynamic>> formattedSugestoes = [];
@@ -129,7 +93,9 @@ class Suggestion {
   }
 
   Future<Widget?> CarregarSugestoes(
-      Suggestion? sugestoes, BuildContext context) async {
+      Suggestion? sugestoes,
+      List<PersonalizedSuggestion>? sugestoesPersonalizadas,
+      BuildContext context) async {
     CardWidget _card = CardWidget();
     Media _media = Media();
     try {
@@ -215,9 +181,81 @@ class Suggestion {
       if (context.mounted) {
         List<Widget> filmesWidgets = [];
         List<Widget> seriesWidgets = [];
+        List<Widget> sugestoesPersonalizadasWidgets = [];
 
         var generosFilmes = await _media.fetchGeneros(firstAirDate: null);
         var generosSeries = await _media.fetchGeneros(firstAirDate: "123");
+
+        //Suggestões Personalizadas
+        if (sugestoesPersonalizadas != null &&
+            sugestoesPersonalizadas.isNotEmpty) {
+          for (var sugestao in sugestoesPersonalizadas) {
+            Map<String, dynamic> mediaInfo = (await _media.getMidia(
+                sugestao.likedMediaId.toString(),
+                sugestao.typeOfLikedMedia!))[0] as Map<String, dynamic>;
+            String? likedMediaTitle = sugestao.typeOfLikedMedia == "movie"
+                ? mediaInfo['title']
+                : mediaInfo['original_name'];
+
+            List<Map<String, dynamic>> sugestoesTranformadasEmMidia = [];
+
+            for (int midiaId in sugestao.suggestionIds!) {
+              var dicionarioMidia = (await _media.getMidia(
+                      midiaId.toString(), sugestao.typeOfLikedMedia!))[0]
+                  as Map<String, dynamic>;
+              Map<String, dynamic> midia = {
+                'id': int.parse(dicionarioMidia['id'].toString()),
+                'poster_path': dicionarioMidia['poster_path'],
+                'vote_average': dicionarioMidia['vote_average'],
+                'overview': dicionarioMidia['overview'],
+                'genre_ids': dicionarioMidia['genres']
+                        .map((genre) => genre['id'])
+                        .toList() ??
+                    [],
+                'original_name': dicionarioMidia['original_name'],
+                'first_air_date': dicionarioMidia['first_air_date'],
+              };
+              sugestoesTranformadasEmMidia.add(midia);
+            }
+
+            // Gerar carrossel para as sugestões personalizadas
+            List<Widget> midiasWidgets = [];
+            for (var midia in sugestoesTranformadasEmMidia) {
+              var card = _card.ObterCard(
+                context,
+                midia,
+                midia['poster_path'],
+              );
+              midiasWidgets.add(card);
+            }
+
+            var carrouselSugestao = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 8.0, bottom: 0.0, top: 10.0),
+                  child: Text(
+                    "Porque você gostou de '$likedMediaTitle'",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                CarouselSlider(
+                  options: CarouselOptions(
+                    aspectRatio: 16 / 9,
+                    viewportFraction: 1 / 3,
+                    enlargeCenterPage: false,
+                  ),
+                  items: midiasWidgets,
+                ),
+                const SizedBox(height: 20),
+              ],
+            );
+
+            sugestoesPersonalizadasWidgets.add(carrouselSugestao);
+          }
+        }
 
         for (var midiasDoGenero in sugestoes.filmes!) {
           midiasDoGenero.forEach((key, value) {
@@ -388,6 +426,30 @@ class Suggestion {
                       ],
                     ),
               //...seriesWidgets,
+              if (sugestoesPersonalizadas!.isNotEmpty) ...[
+                const SizedBox(height: 32.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Divider(
+                      height: 20,
+                      thickness: 5,
+                      indent: 20,
+                      endIndent: 20,
+                      color: Colors.white60,
+                    ),
+                    const SizedBox(height: 32.0),
+                    Text("PARA VOCÊ",
+                        style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        )),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Column(children: sugestoesPersonalizadasWidgets),
+              ],
               const SizedBox(height: 32.0),
             ],
           ),

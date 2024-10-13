@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/controller/media_controller.dart';
+import 'package:media_suggester/controller/personalizedSuggestions_controller.dart';
 import 'package:media_suggester/controller/user_controller.dart';
+import 'package:media_suggester/models/PersonalizedSuggestion.dart';
 import 'package:media_suggester/views/escrever_review.dart';
 import 'package:media_suggester/views/review_unica.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,6 +25,8 @@ class _DetalhesState extends State<Detalhes> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final MediaController _mediaController = MediaController();
   final UserController _userController = UserController();
+  final PersonalizedSuggestionController _personalizedSuggestion =
+      PersonalizedSuggestionController();
   late Future<QuerySnapshot<Map<String, dynamic>>> listReviews;
 
   Map<int, String> _generos = {};
@@ -30,7 +34,7 @@ class _DetalhesState extends State<Detalhes> {
   User? user;
   bool favoritado = false;
   String notaMedia = '';
-  
+
   @override
   void initState() {
     super.initState();
@@ -41,13 +45,13 @@ class _DetalhesState extends State<Detalhes> {
     mediaNota();
   }
 
-  void mudarIcone() async{
-    bool isfavoritado = await _userController.checkFavorito(widget.media['title'] ?? widget.media['original_name'],user!.uid);
+  void mudarIcone() async {
+    bool isfavoritado = await _userController.checkFavorito(
+        widget.media['title'] ?? widget.media['original_name'], user!.uid);
     setState(() {
       favoritado = isfavoritado;
     });
   }
-
 
   Future<void> _fetchGeneros() async {
     final firstAirDate = widget.media['first_air_date'];
@@ -67,7 +71,8 @@ class _DetalhesState extends State<Detalhes> {
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 "${widget.media['title'] ?? widget.media['original_name']} foi adicionado com sucesso.",
-                style: const TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -83,7 +88,8 @@ class _DetalhesState extends State<Detalhes> {
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 "${widget.media['title'] ?? widget.media['original_name']} foi removido com sucesso.",
-                style: const TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -94,16 +100,15 @@ class _DetalhesState extends State<Detalhes> {
     }
   }
 
-  Future <void> mediaNota() async {
-  String mediaNota = await _mediaController.getNotaMedia(widget.media['id']);
-  setState(() {
-    notaMedia = mediaNota;
-  });
-}
+  Future<void> mediaNota() async {
+    String mediaNota = await _mediaController.getNotaMedia(widget.media['id']);
+    setState(() {
+      notaMedia = mediaNota;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
     DateTime dateTime = DateTime.parse(
@@ -159,6 +164,15 @@ class _DetalhesState extends State<Detalhes> {
                                   user!.uid);
                               bool adicionado = await isAdded;
                               mudarIcone();
+                              adicionado ? _personalizedSuggestion.GerarSugestoesPersonalizadasParaFavorito(
+                                  widget.media['title'] == "" ||
+                                          widget.media['title'] == null
+                                      ? 'tv'
+                                      : 'movie',
+                                  widget.media['id'],
+                                  user!.uid) : _personalizedSuggestion.DeletePersonalizedSuggestion(
+                                  widget.media['id'],
+                                  user!.uid);
                               mostrarMensagem(adicionado, context);
                             },
                             style: ElevatedButton.styleFrom(
@@ -168,7 +182,9 @@ class _DetalhesState extends State<Detalhes> {
                                 padding: const EdgeInsets.all(15)),
                             child: Icon(
                               // ignore: unrelated_type_equality_checks
-                              favoritado == true ? Icons.favorite : Icons.favorite_border_outlined,
+                              favoritado == true
+                                  ? Icons.favorite
+                                  : Icons.favorite_border_outlined,
                               color:
                                   Theme.of(context).colorScheme.inversePrimary,
                               size: 25,
@@ -375,9 +391,9 @@ class _DetalhesState extends State<Detalhes> {
                         ),
                       );
                     default:
-                      return  CarouselSlider(
+                      return CarouselSlider(
                         items: _obterComentarios(context, snapshot),
-                        options:  CarouselOptions(
+                        options: CarouselOptions(
                           aspectRatio: 2.0,
                           enlargeCenterPage: true,
                           pageViewKey:
@@ -542,6 +558,5 @@ class _DetalhesState extends State<Detalhes> {
       ));
     }
     return widgets;
-    
   }
 }

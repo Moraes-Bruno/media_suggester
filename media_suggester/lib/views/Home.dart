@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:media_suggester/controller/personalizedSuggestions_controller.dart';
 import 'package:media_suggester/controller/suggestion_controller.dart';
 import 'package:media_suggester/controller/user_controller.dart';
+import 'package:media_suggester/models/PersonalizedSuggestion.dart';
 import 'package:media_suggester/models/Suggestion.dart';
 import 'package:media_suggester/views/genre_movie.dart';
 import 'package:media_suggester/views/perfil.dart';
@@ -19,6 +21,7 @@ class Home extends StatefulWidget {
 
   @override
   State<Home> createState() => _HomeState(user);
+
 }
 
 class _HomeState extends State<Home> {
@@ -32,6 +35,9 @@ class _HomeState extends State<Home> {
   String _carregandoTexto = "Carregando dados, por favor aguarde...";
   UserController _userController = UserController();
   SuggestionController _suggestionController = SuggestionController();
+  PersonalizedSuggestionController _personalizedSuggestionController =
+      PersonalizedSuggestionController();
+  List<PersonalizedSuggestion>? sugestoesPersonalizadas;
 
   _HomeState(this.user);
 
@@ -127,11 +133,18 @@ class _HomeState extends State<Home> {
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot!);
         }
         setState(() {
-          _suggestionController.CarregarSugestoes(sugestoes, context)
+          _personalizedSuggestionController.GetPersonalizedSuggestions(user.uid)
               .then((response) {
+            sugestoesPersonalizadas = response;
+
+            // Chamando o método CarregarSugestoes apenas depois de garantir que sugestoesPersonalizadas foi preenchida
+            return _suggestionController.CarregarSugestoes(
+                sugestoes, sugestoesPersonalizadas, context);
+          }).then((response) {
+            // Atualiza o corpo da página
             _body = response;
-            setState(() {}); //refresh
-          });
+            setState(() {});
+          }).catchError((error) {});
         });
       });
     } catch (e) {
@@ -139,119 +152,127 @@ class _HomeState extends State<Home> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white, size: 30),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        centerTitle: true,
-        title: const Text(
-          "HOME",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          appBar: AppBar(
+            iconTheme: const IconThemeData(color: Colors.white, size: 30),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            centerTitle: true,
+            title: const Text(
+              "HOME",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.white),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Perfil(),
+                            ),
+                          ).then((_) {
+                            carregarSugestoes(user);
+                          });
+                        },
+                        icon: Icon(Icons.person,
+                            color: Theme.of(context).colorScheme.secondary,
+                            size: 30),
+                        padding: const EdgeInsetsDirectional.all(8.0),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          body: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height -
+                kToolbarHeight -
+                kBottomNavigationBarHeight,
+            child: _body ??
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _carregandoImagem,
+                    Text(
+                      _carregandoTexto,
+                      style: const TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10, left: 25, right: 25),
+                      child: LinearProgressIndicator(minHeight: 15),
+                    )
+                  ],
+                ),
+          ),
+          extendBody: true,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: FloatingActionButton.large(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Pesquisa(),
+                ),
+              ).then((_) {
+                carregarSugestoes(user);
+              });
+            },
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            child: const Icon(Icons.search),
+          ),
+          bottomNavigationBar: BottomAppBar(
+            shape: const CircularNotchedRectangle(),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            height: 70,
+            color: Theme.of(context).colorScheme.secondary,
+            notchMargin: 5,
             child: Row(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.white),
-                  child: IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Perfil(),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.person,
-                        color: Theme.of(context).colorScheme.secondary,
-                        size: 30),
-                    padding: const EdgeInsetsDirectional.all(8.0),
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(
+                    Icons.home,
+                    color: Colors.white,
+                    size: 45,
                   ),
-                )
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.event_note_sharp,
+                    color: Colors.white,
+                    size: 45,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Reviews(),
+                      ),
+                    ).then((_) {
+                      carregarSugestoes(user);
+                    });
+                  },
+                ),
               ],
             ),
           ),
-        ],
-      ),
-      body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height -
-            kToolbarHeight -
-            kBottomNavigationBarHeight,
-        child: _body ??
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _carregandoImagem,
-                Text(
-                  _carregandoTexto,
-                  style: const TextStyle(fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 10, left: 25, right: 25),
-                  child: LinearProgressIndicator(minHeight: 15),
-                )
-              ],
-            ),
-      ),
-      extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton.large(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Pesquisa(),
-            ),
-          );
-        },
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.search),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        height: 70,
-        color: Theme.of(context).colorScheme.secondary,
-        notchMargin: 5,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(
-                Icons.home,
-                color: Colors.white,
-                size: 45,
-              ),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.event_note_sharp,
-                color: Colors.white,
-                size: 45,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Reviews(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+        );
   }
 }
