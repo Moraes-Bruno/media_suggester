@@ -38,9 +38,12 @@ class _DetalhesState extends State<Detalhes> {
   @override
   void initState() {
     super.initState();
+
     _fetchGeneros();
     user = _auth.currentUser;
+
     listReviews = _mediaController.fetchReviews(widget.media['id']);
+    
     mudarIcone();
     mediaNota();
   }
@@ -105,7 +108,11 @@ class _DetalhesState extends State<Detalhes> {
     setState(() {
       notaMedia = mediaNota;
     });
+
+    print(widget.media);
   }
+
+
 
   @override
   Widget build(BuildContext context) {

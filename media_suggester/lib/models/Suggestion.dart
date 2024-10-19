@@ -125,7 +125,6 @@ class Suggestion {
                         [],
                     'title': m[i]['title'],
                     'release_date': m[i]['release_date'],
-                    'onde_assistir': midia['ondeAssistir']
                   };
                   postersFilmes.add(midiaCopia);
                   return m;
@@ -164,7 +163,6 @@ class Suggestion {
                         [],
                     'original_name': m[i]['original_name'],
                     'first_air_date': m[i]['first_air_date'],
-                    'onde_assistir': midia['ondeAssistir']
                   };
                   postersSeries.add(midiaCopia);
                   return m;
@@ -199,23 +197,44 @@ class Suggestion {
 
             List<Map<String, dynamic>> sugestoesTranformadasEmMidia = [];
 
-            for (int midiaId in sugestao.suggestionIds!) {
-              var dicionarioMidia = (await _media.getMidia(
-                      midiaId.toString(), sugestao.typeOfLikedMedia!))[0]
-                  as Map<String, dynamic>;
-              Map<String, dynamic> midia = {
-                'id': int.parse(dicionarioMidia['id'].toString()),
-                'poster_path': dicionarioMidia['poster_path'],
-                'vote_average': dicionarioMidia['vote_average'],
-                'overview': dicionarioMidia['overview'],
-                'genre_ids': dicionarioMidia['genres']
-                        .map((genre) => genre['id'])
-                        .toList() ??
-                    [],
-                'original_name': dicionarioMidia['original_name'],
-                'first_air_date': dicionarioMidia['first_air_date'],
-              };
-              sugestoesTranformadasEmMidia.add(midia);
+            if (sugestao.typeOfLikedMedia == "tv") {
+              for (int midiaId in sugestao.suggestionIds!) {
+                var dicionarioMidia = (await _media.getMidia(
+                        midiaId.toString(), sugestao.typeOfLikedMedia!))[0]
+                    as Map<String, dynamic>;
+                Map<String, dynamic> midia = {
+                  'id': int.parse(dicionarioMidia['id'].toString()),
+                  'poster_path': dicionarioMidia['poster_path'],
+                  'vote_average': dicionarioMidia['vote_average'],
+                  'overview': dicionarioMidia['overview'],
+                  'genre_ids': dicionarioMidia['genres']
+                          .map((genre) => genre['id'])
+                          .toList() ??
+                      [],
+                  'original_name': dicionarioMidia['original_name'],
+                  'first_air_date': dicionarioMidia['first_air_date'],
+                };
+                sugestoesTranformadasEmMidia.add(midia);
+              }
+            } else if (sugestao.typeOfLikedMedia == "movie") {
+              for (int midiaId in sugestao.suggestionIds!) {
+                var dicionarioMidia = (await _media.getMidia(
+                        midiaId.toString(), sugestao.typeOfLikedMedia!))[0]
+                    as Map<String, dynamic>;
+                Map<String, dynamic> midia = {
+                  'id': int.parse(dicionarioMidia['id'].toString()),
+                  'poster_path': dicionarioMidia['poster_path'],
+                  'vote_average': dicionarioMidia['vote_average'],
+                  'overview': dicionarioMidia['overview'],
+                  'genre_ids': dicionarioMidia['genres']
+                          .map((genre) => genre['id'])
+                          .toList() ??
+                      [],
+                  'title': dicionarioMidia['title'],
+                  'release_date': dicionarioMidia['release_date'],
+                };
+                sugestoesTranformadasEmMidia.add(midia);
+              }
             }
 
             // Gerar carrossel para as sugestões personalizadas
@@ -428,17 +447,17 @@ class Suggestion {
               //...seriesWidgets,
               if (sugestoesPersonalizadas!.isNotEmpty) ...[
                 const SizedBox(height: 32.0),
-                Column(
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Divider(
+                    Divider(
                       height: 20,
                       thickness: 5,
                       indent: 20,
                       endIndent: 20,
                       color: Colors.white60,
                     ),
-                    const SizedBox(height: 32.0),
+                    SizedBox(height: 32.0),
                     Text("PARA VOCÊ",
                         style: TextStyle(
                           fontSize: 50,
