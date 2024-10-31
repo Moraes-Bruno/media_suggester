@@ -40,6 +40,20 @@ class _GenreMovieState extends State<Genre_movie> {
   }
 
   void _saveSelectedGenres() async {
+    if (selectedCount == 0) {
+      // Exibe uma mensagem se nenhum gênero for selecionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor, selecione pelo menos um gênero.',
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     try {
       await _userController.saveSelectedGenres_movie(genres);
       Navigator.of(context).pop();
@@ -48,7 +62,9 @@ class _GenreMovieState extends State<Genre_movie> {
         MaterialPageRoute(builder: (context) => Gender_serie()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao salvar gêneros: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar gêneros: $e')),
+      );
     }
   }
 
@@ -104,7 +120,12 @@ class _GenreMovieState extends State<Genre_movie> {
                   if (value! && selectedCount >= 5) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Você só pode selecionar até 5 gêneros.'),
+                        content: Text(
+                          'Você só pode selecionar até 5 gêneros.',
+                          style: const TextStyle(
+                              fontSize: 19, fontWeight: FontWeight.bold),
+                        ),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   } else {

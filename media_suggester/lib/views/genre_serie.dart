@@ -41,11 +41,31 @@ class _GenderSerieState extends State<Gender_serie> {
   }
 
   void _saveSelectedGenres() async {
+    if (selectedCount == 0) {
+      // Exibe uma mensagem se nenhum gênero for selecionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor, selecione pelo menos um gênero.',
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 3), // Tempo de exibição da mensagem
+        ),
+      );
+      return;
+    }
+
     try {
       await _userController.saveSelectedGenres_serie(genres);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(user!)));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Home(user!)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao salvar gêneros: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar gêneros: $e'),
+          duration: Duration(seconds: 3), // Tempo de exibição da mensagem
+        ),
+      );
     }
   }
 
@@ -96,7 +116,13 @@ class _GenderSerieState extends State<Gender_serie> {
                   if (value! && selectedCount >= 5) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Você só pode selecionar até 5 gêneros.'),
+                        content: Text(
+                          'Você só pode selecionar até 5 gêneros.',
+                          style: const TextStyle(
+                              fontSize: 19, fontWeight: FontWeight.bold),
+                        ),
+                        duration: Duration(
+                            seconds: 3), // Tempo de exibição da mensagem
                       ),
                     );
                   } else {

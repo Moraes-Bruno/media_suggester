@@ -51,18 +51,44 @@ class UserModel {
     User? user = _auth.currentUser;
     return user != null;
   }
-
+//-------------verifica se existe preferencia --------------------------
   Future<bool> HasPreferences(String userId) async {
     try {
+      // Acessa o documento do usuário na coleção preferences
       DocumentSnapshot user = await FirebaseFirestore.instance
           .collection("preferences")
           .doc(userId)
           .get();
-      return user.exists;
+
+      // Verifica se o documento de preferências existe
+      if (user.exists) {
+        // Acessa o campo genders_movie
+        List<dynamic> gendersMovie = user.get("genders_movie") ?? [];
+        // Acessa o campo genders_serie
+        List<dynamic> gendersSerie = user.get("genders_serie") ?? [];
+
+        // Verifica se ambos os arrays existem e não estão vazios
+        bool hasGendersMovie = gendersMovie.isNotEmpty;
+        bool hasGendersSerie = gendersSerie.isNotEmpty;
+
+        // Debug
+        print("Genders Movie existe: $hasGendersMovie");
+        print("Genders Serie existe: $hasGendersSerie");
+
+        // Se ambos existem, retorna true
+        if (hasGendersMovie && hasGendersSerie) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false; // Retorna false se o documento de preferências não existir
     } catch (e) {
-      return false;
+      print("Erro: $e");
+      return false; // Retorna false em caso de erro
     }
   }
+//-----------------------fim----------------------------------------------------------------
 
   Future<bool> HasSuggestions(String userId) async {
     try {

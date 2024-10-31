@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Media {
-  String chaveApi = "";
+  String chaveApi = "68df955e186472a00f82954f57d23073";
 
   final String urlBase = 'https://api.themoviedb.org/3';
 

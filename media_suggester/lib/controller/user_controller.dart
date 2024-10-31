@@ -39,7 +39,7 @@ class UserController extends PageController {
   Future<void> saveSelectedGenres_movie(List<dynamic> genres) async {
     await _user.saveSelectedGenres_movie(genres);
   }
-  //-------------genre_seria----------------------------
+  //-------------genre_serie----------------------------
   Future<void> saveSelectedGenres_serie(List<dynamic> genres) async {
     await _user.saveSelectedGenres_serie(genres);
   }
