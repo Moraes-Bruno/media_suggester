@@ -47,7 +47,6 @@ class Media {
         return [jsonData];
       } else {
         var stts = response.statusCode;
-        print(url);
         throw Exception(
             'Falha ao carregar os dados da mídia. Status Code: $stts');
       }
@@ -105,7 +104,7 @@ class Media {
   }
 
   //---------------Detalhes.dart-------------------//
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchReviews(int mediaId) {
+  Future<QuerySnapshot<Map<String, dynamic>>>  fetchReviews(int mediaId) {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     return firestore
         .collection('reviews')

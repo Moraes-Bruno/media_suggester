@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:media_suggester/controller/personalizedSuggestions_controller.dart';
 import 'package:media_suggester/controller/suggestion_controller.dart';
 import 'package:media_suggester/controller/user_controller.dart';
+import 'package:media_suggester/models/PersonalizedSuggestion.dart';
 import 'package:media_suggester/models/Suggestion.dart';
 import 'package:media_suggester/views/genre_movie.dart';
 import 'package:media_suggester/views/perfil.dart';
@@ -10,6 +12,7 @@ import 'package:media_suggester/views/pesquisa.dart';
 import 'package:media_suggester/views/reviews.dart';
 import 'package:media_suggester/models/Media.dart';
 
+import '../main.dart';
 import '../models/SuggestionsByGenre.dart';
 
 class Home extends StatefulWidget {
@@ -21,7 +24,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState(user);
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with RouteAware {
   final Media _media = Media();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Widget? _body;
@@ -32,6 +35,9 @@ class _HomeState extends State<Home> {
   String _carregandoTexto = "Carregando dados, por favor aguarde...";
   UserController _userController = UserController();
   SuggestionController _suggestionController = SuggestionController();
+  PersonalizedSuggestionController _personalizedSuggestionController =
+      PersonalizedSuggestionController();
+  List<PersonalizedSuggestion>? sugestoesPersonalizadas;
 
   _HomeState(this.user);
 
@@ -127,16 +133,49 @@ class _HomeState extends State<Home> {
           sugestoes = Suggestion.fromDocumentSnapshot(suggestionSnapshot!);
         }
         setState(() {
-          _suggestionController.CarregarSugestoes(sugestoes, context)
+          _personalizedSuggestionController.GetPersonalizedSuggestions(user.uid)
               .then((response) {
+            sugestoesPersonalizadas = response;
+
+            // Chamando o método CarregarSugestoes apenas depois de garantir que sugestoesPersonalizadas foi preenchida
+            return _suggestionController.CarregarSugestoes(
+                sugestoes, sugestoesPersonalizadas, context);
+          }).then((response) {
+            // Atualiza o corpo da página
             _body = response;
-            setState(() {}); //refresh
-          });
+            setState(() {});
+          }).catchError((error) {});
         });
       });
     } catch (e) {
       print(e);
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute? modalRoute = ModalRoute.of(context);
+    if (modalRoute is PageRoute) {
+      routeObserver.subscribe(this, modalRoute);
+    }
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    _reloadData();
+  }
+
+  void _reloadData() {
+    setState(() {
+      carregarSugestoes(user);
+    });
   }
 
   @override
@@ -165,7 +204,9 @@ class _HomeState extends State<Home> {
                         MaterialPageRoute(
                           builder: (context) => Perfil(),
                         ),
-                      );
+                      ).then((_) {
+                        carregarSugestoes(user);
+                      });
                     },
                     icon: Icon(Icons.person,
                         color: Theme.of(context).colorScheme.secondary,
@@ -209,7 +250,9 @@ class _HomeState extends State<Home> {
             MaterialPageRoute(
               builder: (context) => const Pesquisa(),
             ),
-          );
+          ).then((_) {
+            carregarSugestoes(user);
+          });
         },
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
@@ -246,7 +289,9 @@ class _HomeState extends State<Home> {
                   MaterialPageRoute(
                     builder: (context) => const Reviews(),
                   ),
-                );
+                ).then((_) {
+                  carregarSugestoes(user);
+                });
               },
             ),
           ],
