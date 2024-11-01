@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bced410-f347-4f0c-b04a-57f58b2aff4e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/controller/user_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/controller/user_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/models/Media.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/models/Media.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/models/User.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/models/User.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/genre_movie.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/genre_movie.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/genre_serie.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/genre_serie.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/AlterarPerfil.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/AlterarPerfil.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/Cadastro.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/CadastroPreferencias.dart" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,11 +49,18 @@
     &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Flutter.Unnamed">
+    <configuration name="Unnamed (1)" type="FlutterRunConfigurationType" factoryName="Flutter" nameIsGenerated="true">
+      <method v="2" />
+    </configuration>
     <configuration name="Unnamed" type="FlutterRunConfigurationType" factoryName="Flutter" nameIsGenerated="true">
       <option name="filePath" value="$PROJECT_DIR$/media_suggester/lib/main.dart" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Flutter.Unnamed (1)" />
+      <item itemvalue="Flutter.Unnamed" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -65,5 +72,16 @@
       <updated>1726879319674</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

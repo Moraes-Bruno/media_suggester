@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:media_suggester/views/CadastroPreferencias.dart';
+import 'package:media_suggester/views/genre_movie.dart';
 import 'package:media_suggester/controller/user_controller.dart';
 class Alterar extends StatelessWidget {
   const Alterar({super.key});
@@ -166,7 +166,7 @@ class Alterar extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      CadastroPreferencias()));
+                                      Genre_movie()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
