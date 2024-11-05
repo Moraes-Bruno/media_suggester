@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:media_suggester/controller/user_controller.dart';
 import 'package:media_suggester/views/Home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:media_suggester/views/genre_movie.dart';
 

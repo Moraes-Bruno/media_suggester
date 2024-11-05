@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/views/genre_movie.dart';
 import 'package:media_suggester/controller/user_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Alterar extends StatelessWidget {
   const Alterar({super.key});
 
@@ -139,10 +141,10 @@ class Alterar extends StatelessWidget {
                       width: 264,
                       height: 40,
                       child: ElevatedButton(
-                         onPressed: () {
-                                String nickname = _controller.text;
-                                _userController.alterarPerfil(context, nickname);
-                              },
+                        onPressed: () {
+                          String nickname = _controller.text;
+                          _userController.alterarPerfil(context, nickname);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.secondary,
@@ -165,8 +167,7 @@ class Alterar extends StatelessWidget {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      Genre_movie()));
+                                  builder: (context) => Genre_movie()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:

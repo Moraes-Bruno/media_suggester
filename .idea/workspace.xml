@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bced410-f347-4f0c-b04a-57f58b2aff4e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/controller/user_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/controller/user_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/models/User.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/models/User.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/AlterarPerfil.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/AlterarPerfil.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/Cadastro.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/CadastroPreferencias.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/Login.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/Login.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/lib/views/perfil.dart" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/lib/views/perfil.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media_suggester/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/media_suggester/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

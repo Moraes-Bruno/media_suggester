@@ -243,7 +243,6 @@ class UserModel {
 
   }
 
-
   Future<void> alterarPerfil(BuildContext context, String nickname) async {
   User? user = FirebaseAuth.instance.currentUser;
   if (user == null) {
@@ -284,7 +283,12 @@ void showConfirmationDialog(BuildContext context, String message) {
     },
   );
 }
-  
+//-------------------logout---------------
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
+
 }
 
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_suggester/models/User.dart';
+import 'package:media_suggester/views/Login.dart';
 
 class UserController extends PageController {
   final UserModel _user = UserModel();
@@ -50,5 +51,16 @@ class UserController extends PageController {
 
   Future <bool> checkFavorito(String nomeMedia,String uid) async {
     return _user.checkFavorito(nomeMedia,uid);
+  }
+
+  //---------- Método para fazer logout --------------------------
+  Future<void> signOut(BuildContext context) async {
+    await _user.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+          builder: (context) => Login() // Troque pelo nome da sua classe de Login
+      ),
+          (Route<dynamic> route) => false, // Remove todas as rotas anteriores
+    );
   }
 }

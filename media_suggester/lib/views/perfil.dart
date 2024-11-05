@@ -8,6 +8,8 @@ import 'package:media_suggester/views/favorito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:media_suggester/models/Media.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:media_suggester/views/Login.dart';
 
 class Perfil extends StatelessWidget {
   Perfil({super.key});
@@ -15,6 +17,24 @@ class Perfil extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
 
   final UserController _userController = UserController();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _signOutAndClearData(BuildContext context) async {
+    // Faz o logout do Firebase
+    await _auth.signOut();
+
+    // Limpa os dados armazenados localmente
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Limpa todos os dados armazenados localmente
+
+    // Redireciona para a tela de login
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Login()), // Tela de login
+      (Route<dynamic> route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +161,27 @@ class Perfil extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 16, bottom: 16),
+                    width: 250,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Chama o método de logout da Controller
+                        UserController().signOut(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                      ),
+                      child: Text(
+                        'SAIR',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -172,7 +213,7 @@ class Perfil extends StatelessWidget {
                     ),
                   ),
                   FutureBuilder<List<dynamic>>(
-                    future: _userController.GetFavoritos(user!.uid,true),
+                    future: _userController.GetFavoritos(user!.uid, true),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
