@@ -58,7 +58,7 @@ class UserController extends PageController {
     await _user.signOut();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-          builder: (context) => Login() // Troque pelo nome da sua classe de Login
+          builder: (context) => Login()
       ),
           (Route<dynamic> route) => false, // Remove todas as rotas anteriores
     );
