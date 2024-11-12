@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalizedSuggestion {
-  String apiUrl = "https://mediasuggesterapi.azurewebsites.net";
+  String apiUrl = "https://mediasuggesterapiv2api20241112195901.azurewebsites.net";
   String? userId;
   int? likedMediaId;
   String? typeOfLikedMedia;
