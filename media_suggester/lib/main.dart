@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:media_suggester/my_app.dart';
 import 'package:media_suggester/theme/theme_provider.dart';

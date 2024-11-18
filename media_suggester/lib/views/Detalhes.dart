@@ -512,13 +512,14 @@ class _DetalhesState extends State<Detalhes> {
                                       );
                                     default:
                                       return SizedBox(
-                                        //width: 180,
+                                        width: MediaQuery.of(context).size.width - 250,
                                         child: Text(
                                             (snapshot.data as DocumentSnapshot)
-                                                .get("name"),
+                                                .get("name").toString(),
                                             style: const TextStyle(
                                                 fontSize: 20,
-                                                fontWeight: FontWeight.bold)),
+                                                fontWeight: FontWeight.bold),
+                                          maxLines: 1),
                                       );
                                   }
                                 }),
@@ -527,7 +528,7 @@ class _DetalhesState extends State<Detalhes> {
                               style: const TextStyle(fontSize: 20),
                             ),
                             SizedBox(
-                              //width: 180,
+                              width: MediaQuery.of(context).size.width - 250,
                               child: Text(
                                 review['descricao'],
                                 style: const TextStyle(
